@@ -20,6 +20,8 @@ class AIConfig:
     OCR_MODEL: str = "donut-placeholder"
     # FR-DETR Model
     FR_DETR_MODEL: str = "fr-detr-placeholder"
+    # Diffusion Forensics Model
+    DIFFUSION_MODEL: str = "diffusion-placeholder"
 
 settings = Settings()
 ai_config = AIConfig()

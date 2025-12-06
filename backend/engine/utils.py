@@ -28,7 +28,8 @@ def load_noiseprint():
 def load_diffusion_forensics():
     """Loads the Diffusion Forensics model."""
     print("Loading Diffusion Forensics model placeholder...")
-    return {"model": "Diffusion Forensics model placeholder"}
+    # Model loading will be completed in deployment stage
+    return {"model": None, "processor": None}
 
 def load_ela_preprocessor():
     """Loads the ELA preprocessor."""
