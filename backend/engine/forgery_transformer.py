@@ -1,3 +1,5 @@
+import torch
+import torchvision.transforms as T
 from PIL import Image
 from backend.engine.utils import load_fr_detr
 from backend.app.config import ai_config
@@ -19,20 +21,37 @@ class ForgeryTransformer:
             # self.model.to(self.device)
             pass
 
+        # Initialize a preprocessing function (resize, normalize)
+        # This is a placeholder for actual FR-DETR specific preprocessing
+        self.transform = T.Compose([
+            T.Resize((800, 800)), # Example resize for a common input size
+            T.ToTensor(),
+            T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # Example ImageNet normalization
+        ])
+
     def analyze(self, image: Image):
         """
         Analyzes a document image for forgeries using the FR-DETR model (placeholder logic).
         """
         print("Performing FR-DETR forgery analysis (placeholder)...")
         
-        # Placeholder for image preprocessing (e.g., convert to tensor)
-        # inputs = self.processor(images=image, return_tensors="pt").to(self.device)
+        # Convert image to RGB
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+
+        # Preprocess into tensor
+        try:
+            # Add batch dimension and move to device
+            image_tensor = self.transform(image).unsqueeze(0).to(self.device) 
+        except Exception as e:
+            print(f"Placeholder preprocessing failed: {e}. Returning dummy tensor.")
+            # Create a dummy tensor if preprocessing fails
+            image_tensor = torch.randn(1, 3, 800, 800).to(self.device)
         
-        # Placeholder for model inference
-        # outputs = self.model(**inputs)
+        # Run a placeholder forward pass on model
+        print(f"Simulating model forward pass with input shape: {image_tensor.shape}")
         
         # Simulate output for forged regions
-        # Example output structure for a detected region
         simulated_regions = [
             {
                 "bbox": [50, 50, 150, 150], # [x1, y1, x2, y2]
