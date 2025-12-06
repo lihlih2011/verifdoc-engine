@@ -23,7 +23,8 @@ def load_fr_detr():
 def load_noiseprint():
     """Loads the Noiseprint model."""
     print("Loading Noiseprint model placeholder...")
-    return {"model": "Noiseprint model placeholder"}
+    # Model loading will be completed in deployment stage
+    return {"model": None, "processor": None}
 
 def load_diffusion_forensics():
     """Loads the Diffusion Forensics model."""

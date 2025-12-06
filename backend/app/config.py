@@ -22,6 +22,8 @@ class AIConfig:
     FR_DETR_MODEL: str = "fr-detr-placeholder"
     # Diffusion Forensics Model
     DIFFUSION_MODEL: str = "diffusion-placeholder"
+    # NoisePrint++ Model
+    NOISEPRINT_MODEL: str = "noiseprint-placeholder"
 
 settings = Settings()
 ai_config = AIConfig()
