@@ -16,5 +16,8 @@ class AIConfig:
     ELA_PREPROCESSOR_MODEL_PATH: str = "path/to/ela_preprocessor/model"
     COPYMOVE_DETECTOR_MODEL_PATH: str = "path/to/copymove_detector/model"
 
+    # OCR Model
+    OCR_MODEL: str = "donut-placeholder"
+
 settings = Settings()
 ai_config = AIConfig()

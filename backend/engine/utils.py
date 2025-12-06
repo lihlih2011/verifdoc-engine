@@ -11,7 +11,8 @@ class EngineUtils:
 def load_donut_model():
     """Loads the Donut model."""
     print("Loading Donut model placeholder...")
-    return {"model": "Donut model placeholder"}
+    # Model loading will be completed in deployment stage
+    return {"model": None, "processor": None}
 
 def load_fr_detr():
     """Loads the FR-DETR model."""
