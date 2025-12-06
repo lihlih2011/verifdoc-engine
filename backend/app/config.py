@@ -24,6 +24,8 @@ class AIConfig:
     DIFFUSION_MODEL: str = "diffusion-placeholder"
     # NoisePrint++ Model
     NOISEPRINT_MODEL: str = "noiseprint-placeholder"
+    # ELA++ Quality Step
+    ELA_QUALITY: int = 95
 
 settings = Settings()
 ai_config = AIConfig()
