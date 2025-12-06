@@ -17,7 +17,8 @@ def load_donut_model():
 def load_fr_detr():
     """Loads the FR-DETR model."""
     print("Loading FR-DETR model placeholder...")
-    return {"model": "FR-DETR model placeholder"}
+    # Model loading will be completed in deployment stage
+    return {"model": None, "processor": None}
 
 def load_noiseprint():
     """Loads the Noiseprint model."""

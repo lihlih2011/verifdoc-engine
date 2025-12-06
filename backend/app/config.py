@@ -18,6 +18,8 @@ class AIConfig:
 
     # OCR Model
     OCR_MODEL: str = "donut-placeholder"
+    # FR-DETR Model
+    FR_DETR_MODEL: str = "fr-detr-placeholder"
 
 settings = Settings()
 ai_config = AIConfig()
