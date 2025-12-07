@@ -86,14 +86,62 @@ const ResultatAnalyse = ({
     return "bg-green-500 hover:bg-green-600"; // Aucun problème (default, though not explicitly requested for positive indicators)
   };
 
-  const handleExportPdf = () => {
+  const handleExportPdf = async () => {
     setIsDownloading(true);
     toast.info("Génération du rapport PDF en cours...");
-    // Placeholder for actual PDF generation/download logic
-    setTimeout(() => {
-      toast.success("Rapport PDF exporté avec succès ! (Fonctionnalité complète à implémenter)");
+    setError(null); // Clear previous errors
+
+    try {
+      const payload = {
+        filename,
+        globalScore,
+        summary,
+        indicators,
+        heatmaps,
+        ocr: raw.ocr ? {
+          rawText: raw.ocr.rawText,
+          anomalies: raw.ocr.anomalies,
+          dates: raw.ocr.dates,
+          numbers: raw.ocr.numbers,
+        } : undefined,
+        uploadedAt,
+        size, // Include size in payload
+        type, // Include type in payload
+      };
+
+      const response = await fetch("/api/pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Erreur HTTP! statut: ${response.status}`);
+      }
+
+      const { pdfBase64 } = await response.json();
+
+      const byteArray = Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0));
+      const blob = new Blob([byteArray], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `VerifDoc_Report_${filename.replace(/\s/g, '_')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      toast.success("Rapport PDF exporté avec succès !");
+    } catch (e: any) {
+      setError(e.message || "Une erreur est survenue lors de l'exportation du rapport PDF.");
+      toast.error(e.message || "Échec de l'exportation du rapport PDF.");
+    } finally {
       setIsDownloading(false);
-    }, 2000);
+    }
   };
 
   // Helper for file size formatting
@@ -106,17 +154,41 @@ const ResultatAnalyse = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   };
 
+  const [error, setError] = useState<string | null>(null); // State for displaying errors
+
   return (
     <DashboardLayout>
       <div className="container mx-auto py-8 px-4">
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-foreground mb-3">
-            Résultat de l’analyse
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Synthèse complète de l’examen forensic VerifDoc™.
-          </p>
+        <div className="flex justify-between items-center mb-10">
+          <div className="text-left">
+            <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-foreground mb-3">
+              Résultat de l’analyse
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              Synthèse complète de l’examen forensic VerifDoc™.
+            </p>
+          </div>
+          <Button onClick={handleExportPdf} disabled={isDownloading} className="gap-2">
+            {isDownloading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Génération du PDF...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4" />
+                Exporter le rapport PDF
+              </>
+            )}
+          </Button>
         </div>
+
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertTitle>Erreur</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         {/* Global Score and Summary */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -325,23 +397,6 @@ const ResultatAnalyse = ({
             </div>
           </CardContent>
         </Card>
-
-        {/* Action Button */}
-        <div className="flex justify-end mt-8">
-          <Button onClick={handleExportPdf} disabled={isDownloading} className="gap-2">
-            {isDownloading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Exportation...
-              </>
-            ) : (
-              <>
-                <Download className="h-4 w-4" />
-                Exporter le rapport PDF
-              </>
-            )}
-          </Button>
-        </div>
       </div>
     </DashboardLayout>
   );
