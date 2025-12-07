@@ -23,6 +23,7 @@ import {
   Brain,
   ScrollText,
 } from "lucide-react";
+import Hero from "@/components/Hero"; // Import the new Hero component
 
 const Index = () => {
   const features = [
@@ -87,30 +88,7 @@ const Index = () => {
   return (
     <div className="flex flex-col items-center justify-center space-y-20 py-16">
       {/* HERO SECTION */}
-      <section className="w-full text-center py-20 md:py-32 bg-gradient-to-br from-background to-muted">
-        <div className="container mx-auto max-w-6xl px-6">
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground mb-6 leading-tight">
-            La plateforme IA de détection de falsification la plus avancée en Europe.
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10">
-            Analyse de documents, détection de montages, OCR intelligent, empreintes GAN et moteur de fusion propriétaire.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
-            <Button asChild size="lg" className="px-8 py-6 text-lg">
-              <Link to="/analyze">Essayer maintenant</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="px-8 py-6 text-lg">
-              <Link to="/demo">Voir la démo</Link>
-            </Button>
-          </div>
-          <div className="relative w-full max-w-4xl mx-auto h-64 md:h-96 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl shadow-xl flex items-center justify-center overflow-hidden border border-border">
-            <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
-            <span className="text-2xl md:text-3xl font-semibold text-muted-foreground/70 z-10">
-              Document Analysis Preview
-            </span>
-          </div>
-        </div>
-      </section>
+      <Hero /> {/* Render the new Hero component here */}
 
       {/* TRUST BADGES / CLIENT LOGOS */}
       <section className="w-full py-12 bg-muted/30">
