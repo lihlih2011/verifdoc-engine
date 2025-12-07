@@ -33,6 +33,58 @@ class FusionEngine:
             # Catch any potential errors during access, though .get() should handle most
             return default
 
-    def fuse_results(self, analysis_results: dict):
-        # Placeholder for fusion logic
-        return {"overall_verdict": "Fusion result placeholder"}
+    def fuse(self, results: dict):
+        # 1. Extract module scores using _safe_extract()
+        ocr_s        = self._safe_extract(results, "ocr", "score", 0.0)
+        frdetr_s     = self._safe_extract(results, "frdetr", "score", 0.0)
+        diffusion_s  = self._safe_extract(results, "diffusion", "score", 0.0)
+        noiseprint_s = self._safe_extract(results, "noiseprint", "ai_score", 0.0)
+        ela_s        = self._safe_extract(results, "ela", "ela_score", 0.0)
+        copymove_s   = self._safe_extract(results, "copymove", "copy_move_score", 0.0)
+
+        # 2. Normalize all values
+        ocr_n        = self._normalize(ocr_s)
+        frdetr_n     = self._normalize(frdetr_s)
+        diffusion_n  = self._normalize(diffusion_s)
+        noiseprint_n = self._normalize(noiseprint_s)
+        ela_n        = self._normalize(ela_s)
+        copymove_n   = self._normalize(copymove_s)
+
+        # 3. Compute weighted score
+        final_score = (
+            ocr_n        * self.ocr_weight +
+            frdetr_n     * self.frdetr_weight +
+            diffusion_n  * self.diffusion_weight +
+            noiseprint_n * self.noiseprint_weight +
+            ela_n        * self.ela_weight +
+            copymove_n   * self.copymove_weight
+        )
+
+        # 4. Convert final_score → 0–100
+        final_score = int(final_score * 100)
+
+        # 5. Build explanation
+        explanation = {
+            "ocr":          "Suspicious text or layout" if ocr_n > 0.5 else "No textual anomalies",
+            "visual":       "Altered regions detected" if frdetr_n > 0.5 else "No visual tampering detected",
+            "inpainting":   "Possible AI reconstruction" if diffusion_n > 0.5 else "No inpainting traces",
+            "ai_noise":     "AI-generated texture inconsistencies" if noiseprint_n > 0.5 else "No AI noise signature",
+            "compression":  "Compression anomalies detected" if ela_n > 0.5 else "Normal compression",
+            "duplication":  "Copy-move duplication detected" if copymove_n > 0.5 else "No duplication traces",
+            "summary":      "Document likely altered" if final_score > 60 else "Document likely authentic"
+        }
+
+        # 6. Prepare clean output JSON
+        return {
+            "forgery_score": final_score,
+            "module_scores": {
+                "ocr": ocr_n,
+                "frdetr": frdetr_n,
+                "diffusion": diffusion_n,
+                "noiseprint": noiseprint_n,
+                "ela": ela_n,
+                "copymove": copymove_n
+            },
+            "explanation": explanation,
+            "raw_output": "fusion-v1"
+        }
