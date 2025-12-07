@@ -36,7 +36,7 @@ export const Navbar = () => {
   const navLinks = [
     { name: "Accueil", path: "/" },
     { name: "Analyse", path: "/analyze" },
-    { name: "Tarifs", path: "/pricing" },
+    { name: "Tarifs", path: "/pricing" }, // Added pricing link
     { name: "À propos", path: "/about" },
   ];
 
