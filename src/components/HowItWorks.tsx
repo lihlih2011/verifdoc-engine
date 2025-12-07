@@ -3,6 +3,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { UploadCloud, Layers, ScanSearch, FileCheck } from "lucide-react";
+import FadeIn from "@/components/animations/FadeIn";
 
 const HowItWorks = () => {
   const steps = [
@@ -29,42 +30,44 @@ const HowItWorks = () => {
   ];
 
   return (
-    <section className="w-full py-20 bg-muted/30">
-      <div className="container mx-auto max-w-6xl px-6 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-          Comment fonctionne VerifDoc ?
-        </h2>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-12">
-          Le processus d’analyse repose sur une chaîne méthodologique structurée, permettant une évaluation fiable, reproductible et conforme aux standards internationaux.
-        </p>
+    <FadeIn delay={200}>
+      <section className="w-full py-20 bg-muted/30">
+        <div className="container mx-auto max-w-6xl px-6 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+            Comment fonctionne VerifDoc ?
+          </h2>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-12">
+            Le processus d’analyse repose sur une chaîne méthodologique structurée, permettant une évaluation fiable, reproductible et conforme aux standards internationaux.
+          </p>
 
-        <img
-          src="/images/verifdoc-process.svg"
-          alt="Schéma du processus VerifDoc"
-          className="mx-auto my-12 w-full max-w-4xl"
-        />
+          <img
+            src="/images/verifdoc-process.svg"
+            alt="Schéma du processus VerifDoc"
+            className="mx-auto my-12 w-full max-w-4xl"
+          />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {steps.map((step, index) => (
-            <Card key={index} className="flex flex-col items-center text-center p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
-              <CardHeader className="pb-4">
-                <div className="p-3 rounded-full bg-primary/10 mb-4">
-                  {step.icon}
-                </div>
-                <CardTitle className="text-xl font-semibold text-foreground">
-                  {step.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-muted-foreground">
-                  {step.description}
-                </CardDescription>
-              </CardContent>
-            </Card>
-          ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {steps.map((step, index) => (
+              <Card key={index} className="flex flex-col items-center text-center p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                <CardHeader className="pb-4">
+                  <div className="p-3 rounded-full bg-primary/10 mb-4">
+                    {step.icon}
+                  </div>
+                  <CardTitle className="text-xl font-semibold text-foreground">
+                    {step.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-muted-foreground">
+                    {step.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </FadeIn>
   );
 };
 

@@ -3,6 +3,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ImageMinus, Waves, Sparkles, Copy, Scan } from "lucide-react";
+import FadeIn from "@/components/animations/FadeIn";
 
 const AnalyseModules = () => {
   const modules = [
@@ -34,36 +35,38 @@ const AnalyseModules = () => {
   ];
 
   return (
-    <section className="w-full py-20 bg-background">
-      <div className="container mx-auto max-w-6xl px-6 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-          Modules d’analyse VerifDoc
-        </h2>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-12">
-          Chaque document est examiné à travers plusieurs moteurs d'analyse spécialisés, permettant de détecter les altérations, incohérences et signatures visuelles non perceptibles à l’œil humain. Ces modules forment une méthodologie robuste et reproductible, conforme aux standards internationaux.
-        </p>
+    <FadeIn delay={300}>
+      <section className="w-full py-20 bg-background">
+        <div className="container mx-auto max-w-6xl px-6 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+            Modules d’analyse VerifDoc
+          </h2>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-12">
+            Chaque document est examiné à travers plusieurs moteurs d'analyse spécialisés, permettant de détecter les altérations, incohérences et signatures visuelles non perceptibles à l’œil humain. Ces modules forment une méthodologie robuste et reproductible, conforme aux standards internationaux.
+          </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {modules.map((module, index) => (
-            <Card key={index} className="flex flex-col items-center text-center p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-card border-border">
-              <CardHeader className="pb-4">
-                <div className="p-3 rounded-full bg-primary/10 mb-4">
-                  {module.icon}
-                </div>
-                <CardTitle className="text-xl font-semibold text-foreground">
-                  {module.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-muted-foreground">
-                  {module.description}
-                </CardDescription>
-              </CardContent>
-            </Card>
-          ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {modules.map((module, index) => (
+              <Card key={index} className="flex flex-col items-center text-center p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-card border-border">
+                <CardHeader className="pb-4">
+                  <div className="p-3 rounded-full bg-primary/10 mb-4">
+                    {module.icon}
+                  </div>
+                  <CardTitle className="text-xl font-semibold text-foreground">
+                    {module.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-muted-foreground">
+                    {module.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </FadeIn>
   );
 };
 
