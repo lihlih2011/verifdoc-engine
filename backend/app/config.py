@@ -4,6 +4,7 @@ class Settings:
     PROJECT_NAME: str = "VerifDoc Backend"
     VERSION: str = "1.0.0"
     DESCRIPTION: str = "Forensic AI Document Analysis Platform"
+    DATABASE_URL: str = "sqlite:///./verifdoc.db" # Added database URL
 
 class AIConfig:
     DEVICE: str = "cuda" if torch.cuda.is_available() else "cpu"

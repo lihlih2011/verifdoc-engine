@@ -33,6 +33,16 @@ class FusionEngine:
             # Catch any potential errors during access, though .get() should handle most
             return default
 
+    def _get_risk_level_text(self, score: int) -> str:
+        """
+        Determines the risk level text based on the forensic score.
+        """
+        if score < 40:
+            return "Faible"
+        if score >= 40 and score <= 70:
+            return "Modéré"
+        return "Élevé"
+
     def fuse(self, results: dict):
         # 1. Extract module scores using _safe_extract()
         ocr_s        = self._safe_extract(results, "ocr", "score", 0.0)
@@ -61,7 +71,8 @@ class FusionEngine:
         )
 
         # 4. Convert final_score → 0–100
-        final_score = int(final_score * 100)
+        final_score_percent = int(final_score * 100)
+        risk_level_text = self._get_risk_level_text(final_score_percent)
 
         # 5. Build explanation
         explanation = {
@@ -71,12 +82,13 @@ class FusionEngine:
             "ai_noise":     "AI-generated texture inconsistencies" if noiseprint_n > 0.5 else "No AI noise signature",
             "compression":  "Compression anomalies detected" if ela_n > 0.5 else "Normal compression",
             "duplication":  "Copy-move duplication detected" if copymove_n > 0.5 else "No duplication traces",
-            "summary":      "Document likely altered" if final_score > 60 else "Document likely authentic"
+            "summary":      "Document likely altered" if final_score_percent > 60 else "Document likely authentic"
         }
 
         # 6. Prepare clean output JSON
         return {
-            "forgery_score": final_score,
+            "forgery_score": final_score_percent,
+            "risk_level": risk_level_text, # Added risk_level here
             "module_scores": {
                 "ocr": ocr_n,
                 "frdetr": frdetr_n,
