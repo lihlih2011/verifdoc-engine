@@ -158,245 +158,271 @@ const ResultatAnalyse = ({
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex justify-between items-center mb-10">
-          <div className="text-left">
-            <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-foreground mb-3">
-              Résultat de l’analyse
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl">
-              Synthèse complète de l’examen forensic VerifDoc™.
-            </p>
-          </div>
-          <Button onClick={handleExportPdf} disabled={isDownloading} className="gap-2">
-            {isDownloading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Génération du PDF...
-              </>
-            ) : (
-              <>
-                <Download className="h-4 w-4" />
-                Exporter le rapport PDF
-              </>
-            )}
-          </Button>
-        </div>
+      <div className="relative container mx-auto py-8 px-4">
+        {/* Watermark */}
+        <img
+          src="/verifdoc-seal.svg"
+          alt="VerifDoc Seal Watermark"
+          className="absolute inset-0 w-full h-full object-cover opacity-5 z-0 pointer-events-none"
+        />
 
-        {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertTitle>Erreur</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        {/* Global Score and Summary */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="lg:col-span-1 flex flex-col items-center justify-center p-6 shadow-lg">
-            <CardHeader className="text-center pb-4">
-              <CardTitle className="text-2xl font-semibold text-foreground">
-                Score global VerifDoc™
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center p-0">
-              <div
-                className="relative w-32 h-32 rounded-full flex items-center justify-center text-2xl font-bold text-primary"
-                style={{
-                  background: `radial-gradient(closest-side, var(--card) 79%, transparent 80% 100%), conic-gradient(var(--primary) ${globalScore}%, var(--muted) 0)`,
-                  border: '4px solid var(--border)',
-                }}
-              >
-                {globalScore}%
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="lg:col-span-2 p-6 shadow-lg">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <FlaskConical className="h-6 w-6 text-primary" />
-                Résumé de l’analyse
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground text-base leading-relaxed">
-                {summary}
+        <div className="relative z-10"> {/* Ensure content is above watermark */}
+          <div className="flex justify-between items-center mb-10">
+            <div className="text-left">
+              <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-foreground mb-3">
+                Résultat de l’analyse
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-2xl">
+                Synthèse complète de l’examen forensic VerifDoc™.
               </p>
-              {indicators.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold text-foreground mb-3">Indicateurs clés :</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {indicators.map((indicator, index) => (
-                      <Badge key={index} className={cn("text-white px-3 py-1 text-sm", getIndicatorBadgeColor(indicator))}>
-                        {indicator}
-                      </Badge>
-                    ))}
-                  </div>
+            </div>
+            <Button onClick={handleExportPdf} disabled={isDownloading} className="gap-2">
+              {isDownloading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Génération du PDF...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4" />
+                  Exporter le rapport PDF
+                </>
+              )}
+            </Button>
+          </div>
+
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTitle>Erreur</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Certification Box */}
+          <Card className="mb-8 p-6 shadow-lg flex flex-col md:flex-row items-center justify-between bg-card border-border">
+            <div className="text-center md:text-left mb-4 md:mb-0">
+              <CardTitle className="text-2xl font-bold text-foreground mb-2">
+                Analyse certifiée – VerifDoc™
+              </CardTitle>
+              <CardDescription className="text-muted-foreground text-base">
+                Ce rapport est vérifié par nos moteurs d’analyse forensique.
+              </CardDescription>
+            </div>
+            <img
+              src="/verifdoc-seal.svg"
+              alt="VerifDoc Certification Seal"
+              className="h-24 w-24 md:h-32 md:w-32 flex-shrink-0"
+            />
+          </Card>
+
+          {/* Global Score and Summary */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <Card className="lg:col-span-1 flex flex-col items-center justify-center p-6 shadow-lg">
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-2xl font-semibold text-foreground">
+                  Score global VerifDoc™
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center justify-center p-0">
+                <div
+                  className="relative w-32 h-32 rounded-full flex items-center justify-center text-2xl font-bold text-primary"
+                  style={{
+                    background: `radial-gradient(closest-side, var(--card) 79%, transparent 80% 100%), conic-gradient(var(--primary) ${globalScore}%, var(--muted) 0)`,
+                    border: '4px solid var(--border)',
+                  }}
+                >
+                  {globalScore}%
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
 
-        {/* Heatmaps Section */}
-        <h2 className="text-3xl font-bold text-foreground mb-6 mt-12">Heatmaps forensic</h2>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-          Ces cartes thermiques montrent les zones détectées comme potentiellement manipulées par chaque module d'analyse.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="p-4 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xl flex items-center gap-2">
-                <ImageMinus className="h-5 w-5 text-primary" /> ELA Heatmap
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center h-64 bg-muted/50 rounded-md overflow-hidden">
-              {heatmaps.ela ? (
-                <img src={heatmaps.ela} alt="ELA Heatmap" className="max-h-full object-contain" />
-              ) : (
-                <p className="text-muted-foreground">Non disponible</p>
-              )}
-            </CardContent>
-          </Card>
+            <Card className="lg:col-span-2 p-6 shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <FlaskConical className="h-6 w-6 text-primary" />
+                  Résumé de l’analyse
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground text-base leading-relaxed">
+                  {summary}
+                </p>
+                {indicators.length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-3">Indicateurs clés :</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {indicators.map((indicator, index) => (
+                        <Badge key={index} className={cn("text-white px-3 py-1 text-sm", getIndicatorBadgeColor(indicator))}>
+                          {indicator}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-          <Card className="p-4 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xl flex items-center gap-2">
-                <Waves className="h-5 w-5 text-primary" /> NoisePrint Heatmap
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center h-64 bg-muted/50 rounded-md overflow-hidden">
-              {heatmaps.noiseprint ? (
-                <img src={heatmaps.noiseprint} alt="NoisePrint Heatmap" className="max-h-full object-contain" />
-              ) : (
-                <p className="text-muted-foreground">Non disponible</p>
-              )}
-            </CardContent>
-          </Card>
+          {/* Heatmaps Section */}
+          <h2 className="text-3xl font-bold text-foreground mb-6 mt-12">Heatmaps forensic</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+            Ces cartes thermiques montrent les zones détectées comme potentiellement manipulées par chaque module d'analyse.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <Card className="p-4 shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <ImageMinus className="h-5 w-5 text-primary" /> ELA Heatmap
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex items-center justify-center h-64 bg-muted/50 rounded-md overflow-hidden">
+                {heatmaps.ela ? (
+                  <img src={heatmaps.ela} alt="ELA Heatmap" className="max-h-full object-contain" />
+                ) : (
+                  <p className="text-muted-foreground">Non disponible</p>
+                )}
+              </CardContent>
+            </Card>
 
-          <Card className="p-4 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xl flex items-center gap-2">
-                <Copy className="h-5 w-5 text-primary" /> Copy-Move Heatmap
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center h-64 bg-muted/50 rounded-md overflow-hidden">
-              {heatmaps.copymove ? (
-                <img src={heatmaps.copymove} alt="Copy-Move Heatmap" className="max-h-full object-contain" />
-              ) : (
-                <p className="text-muted-foreground">Non disponible</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+            <Card className="p-4 shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <Waves className="h-5 w-5 text-primary" /> NoisePrint Heatmap
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex items-center justify-center h-64 bg-muted/50 rounded-md overflow-hidden">
+                {heatmaps.noiseprint ? (
+                  <img src={heatmaps.noiseprint} alt="NoisePrint Heatmap" className="max-h-full object-contain" />
+                ) : (
+                  <p className="text-muted-foreground">Non disponible</p>
+                )}
+              </CardContent>
+            </Card>
 
-        {/* OCR Section */}
-        {raw.ocr && (
+            <Card className="p-4 shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <Copy className="h-5 w-5 text-primary" /> Copy-Move Heatmap
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex items-center justify-center h-64 bg-muted/50 rounded-md overflow-hidden">
+                {heatmaps.copymove ? (
+                  <img src={heatmaps.copymove} alt="Copy-Move Heatmap" className="max-h-full object-contain" />
+                ) : (
+                  <p className="text-muted-foreground">Non disponible</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* OCR Section */}
+          {raw.ocr && (
+            <Card className="mb-8 p-6 shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <ScanText className="h-6 w-6 text-primary" />
+                  Analyse OCR & Sémantique
+                </CardTitle>
+                <CardDescription>Score OCR: {raw.ocr.score?.toFixed(1)}%</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="raw-text">
+                    <AccordionTrigger className="text-lg font-medium text-foreground hover:no-underline">
+                      Texte extrait
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-sm whitespace-pre-wrap">
+                      {raw.ocr.rawText || "Aucun texte extrait."}
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+
+                {raw.ocr.dates.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-2">
+                      <CalendarDays className="h-5 w-5 text-muted-foreground" /> Dates détectées
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {raw.ocr.dates.map((date, index) => (
+                        <Badge key={index} variant="secondary">{date}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {raw.ocr.numbers.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-2">
+                      <Hash className="h-5 w-5 text-muted-foreground" /> Numéros détectés
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {raw.ocr.numbers.map((num, index) => (
+                        <Badge key={index} variant="secondary">{num}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {raw.ocr.names.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-2">
+                      <User className="h-5 w-5 text-muted-foreground" /> Noms/Entités détectés
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {raw.ocr.names.map((name, index) => (
+                        <Badge key={index} variant="secondary">{name}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {raw.ocr.anomalies.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-2">
+                      <AlertTriangle className="h-5 w-5 text-destructive" /> Anomalies OCR
+                    </h3>
+                    <ul className="list-disc list-inside text-muted-foreground text-sm space-y-1">
+                      {raw.ocr.anomalies.map((anomaly, index) => (
+                        <li key={index}>{anomaly}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Metadata Section */}
           <Card className="mb-8 p-6 shadow-lg">
             <CardHeader className="pb-4">
               <CardTitle className="text-2xl flex items-center gap-2">
-                <ScanText className="h-6 w-6 text-primary" />
-                Analyse OCR & Sémantique
+                <HardDrive className="h-6 w-6 text-primary" />
+                Métadonnées du document
               </CardTitle>
-              <CardDescription>Score OCR: {raw.ocr.score?.toFixed(1)}%</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="raw-text">
-                  <AccordionTrigger className="text-lg font-medium text-foreground hover:no-underline">
-                    Texte extrait
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground text-sm whitespace-pre-wrap">
-                    {raw.ocr.rawText || "Aucun texte extrait."}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-
-              {raw.ocr.dates.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-2">
-                    <CalendarDays className="h-5 w-5 text-muted-foreground" /> Dates détectées
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {raw.ocr.dates.map((date, index) => (
-                      <Badge key={index} variant="secondary">{date}</Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {raw.ocr.numbers.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-2">
-                    <Hash className="h-5 w-5 text-muted-foreground" /> Numéros détectés
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {raw.ocr.numbers.map((num, index) => (
-                      <Badge key={index} variant="secondary">{num}</Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {raw.ocr.names.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-2">
-                    <User className="h-5 w-5 text-muted-foreground" /> Noms/Entités détectés
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {raw.ocr.names.map((name, index) => (
-                      <Badge key={index} variant="secondary">{name}</Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {raw.ocr.anomalies.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-2">
-                    <AlertTriangle className="h-5 w-5 text-destructive" /> Anomalies OCR
-                  </h3>
-                  <ul className="list-disc list-inside text-muted-foreground text-sm space-y-1">
-                    {raw.ocr.anomalies.map((anomaly, index) => (
-                      <li key={index}>{anomaly}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 text-muted-foreground text-base">
+              <div>
+                <span className="font-semibold text-foreground">Nom du fichier :</span> {filename}
+              </div>
+              <div>
+                <span className="font-semibold text-foreground">Taille :</span> {formatBytes(size)}
+              </div>
+              <div>
+                <span className="font-semibold text-foreground">Type :</span> {type}
+              </div>
+              <div>
+                <span className="font-semibold text-foreground">Date d'upload :</span>{" "}
+                {new Date(uploadedAt).toLocaleString('fr-FR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </div>
             </CardContent>
           </Card>
-        )}
-
-        {/* Metadata Section */}
-        <Card className="mb-8 p-6 shadow-lg">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <HardDrive className="h-6 w-6 text-primary" />
-              Métadonnées du document
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 text-muted-foreground text-base">
-            <div>
-              <span className="font-semibold text-foreground">Nom du fichier :</span> {filename}
-            </div>
-            <div>
-              <span className="font-semibold text-foreground">Taille :</span> {formatBytes(size)}
-            </div>
-            <div>
-              <span className="font-semibold text-foreground">Type :</span> {type}
-            </div>
-            <div>
-              <span className="font-semibold text-foreground">Date d'upload :</span>{" "}
-              {new Date(uploadedAt).toLocaleString('fr-FR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </div>
-          </CardContent>
-        </Card>
+        </div>
       </div>
     </DashboardLayout>
   );
