@@ -12,7 +12,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher"; // Changed import to ThemeSwitcher
 import { Separator } from "@/components/ui/separator";
 
 export const Navbar = () => {
@@ -61,12 +61,12 @@ export const Navbar = () => {
           <Button asChild className="ml-4">
             <Link to="/try-now">Essayer maintenant</Link>
           </Button>
-          <ThemeToggle />
+          <ThemeSwitcher /> {/* Using the new ThemeSwitcher */}
         </div>
 
         {/* Mobile Navigation */}
         <div className="md:hidden flex items-center space-x-2">
-          <ThemeToggle />
+          <ThemeSwitcher /> {/* Using the new ThemeSwitcher */}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
