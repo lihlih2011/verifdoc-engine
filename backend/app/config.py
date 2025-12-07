@@ -27,5 +27,13 @@ class AIConfig:
     # ELA++ Quality Step
     ELA_QUALITY: int = 95
 
+    # Fusion Engine Weights (placeholder values)
+    FUSION_OCR_WEIGHT: float = 0.2
+    FUSION_FRDETR_WEIGHT: float = 0.2
+    FUSION_DIFFUSION_WEIGHT: float = 0.2
+    FUSION_NOISEPRINT_WEIGHT: float = 0.2
+    FUSION_ELA_WEIGHT: float = 0.1
+    FUSION_COPYMOVE_WEIGHT: float = 0.1
+
 settings = Settings()
 ai_config = AIConfig()
