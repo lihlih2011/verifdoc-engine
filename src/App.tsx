@@ -13,6 +13,7 @@ import SignupPage from "./pages/auth/signup";
 import ResetPasswordPage from "./pages/auth/reset-password";
 import HistoryPage from "./pages/dashboard/history";
 import AnalysisDetailPage from "./pages/dashboard/analysis/[id]";
+import SecurityPage from "./pages/SecurityPage"; // New import for SecurityPage
 import { ThemeProvider } from "@/components/ThemeProvider"; // Updated import
 import { MainLayout } from "@/layouts/MainLayout";
 import { AuthProvider } from "./context/AuthContext";
@@ -32,6 +33,7 @@ const App = () => (
               {/* Public Routes */}
               <Route path="/" element={<Home />} /> {/* Use Home directly */}
               <Route path="/pricing" element={<MainLayout><Pricing /></MainLayout>} />
+              <Route path="/security" element={<SecurityPage />} /> {/* New Security route */}
               <Route path="/auth/login" element={<LoginPage />} />
               <Route path="/auth/signup" element={<SignupPage />} />
               <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
