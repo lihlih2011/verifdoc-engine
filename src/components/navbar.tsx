@@ -11,7 +11,7 @@ export const Navbar = () => {
         VerifDoc
       </Link>
       <div className="flex items-center space-x-4">
-        {/* Navigation links can go here */}
+        <Link to="/analyze" className="text-muted-foreground hover:text-foreground">Analyze Document</Link> {/* New link */}
         <Link to="/dashboard" className="text-muted-foreground hover:text-foreground">Dashboard</Link>
         <Link to="/settings" className="text-muted-foreground hover:text-foreground">Settings</Link>
         <ThemeToggle />
