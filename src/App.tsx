@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import AnalyzeDocument from "./pages/AnalyzeDocument";
-import Pricing from "./pages/pricing"; // Fixed casing here
+import Pricing from "./pages/pricing"; // Corrected casing
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/auth/login";
 import SignupPage from "./pages/auth/signup";
