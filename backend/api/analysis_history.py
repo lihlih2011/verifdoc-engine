@@ -42,5 +42,6 @@ async def get_analysis_detail(record_id: int, db: Session = Depends(get_db)):
         "forensic_score": record.forensic_score,
         "risk_level": record.risk_level,
         "created_at": record.created_at.isoformat(),
-        "full_result": record.full_result
+        "full_result": record.full_result,
+        "heatmaps": record.heatmaps # Include heatmap paths
     }

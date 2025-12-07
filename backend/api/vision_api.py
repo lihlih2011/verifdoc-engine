@@ -12,6 +12,7 @@ from backend.engine.gan_fingerprint import GANFingerprintDetector
 from backend.engine.ela_engine import ELAEngine
 from backend.engine.copymove_engine import CopyMoveEngine
 from backend.engine.fusion import FusionEngine
+from backend.engine.heatmap_generator import HeatmapGenerator # Import HeatmapGenerator
 from backend.app.database import get_db # Import get_db
 from backend.models.analysis_record import AnalysisRecord # Import AnalysisRecord
 
@@ -25,6 +26,7 @@ noiseprint_engine = GANFingerprintDetector(device="cpu")
 ela_engine = ELAEngine()
 copymove_engine = CopyMoveEngine()
 fusion_engine = FusionEngine()
+heatmap_gen = HeatmapGenerator() # Initialize HeatmapGenerator
 
 @router.post("")
 async def analyze_document(file: UploadFile = File(...), db: Session = Depends(get_db)):
@@ -54,6 +56,15 @@ async def analyze_document(file: UploadFile = File(...), db: Session = Depends(g
             "copymove": copymove_res
         })
 
+        # Generate heatmaps
+        heatmaps = {
+            "ela": heatmap_gen.generate_ela_heatmap(image),
+            "gan": heatmap_gen.generate_gan_heatmap(image),
+            "copymove": heatmap_gen.generate_copymove_heatmap(image),
+            "diffusion": heatmap_gen.generate_diffusion_heatmap(image)
+        }
+        final_result["heatmaps"] = heatmaps # Add heatmaps to final_result
+
         # Save analysis record to database
         record = AnalysisRecord(
             user_id=None, # Placeholder for actual user ID from auth
@@ -61,6 +72,7 @@ async def analyze_document(file: UploadFile = File(...), db: Session = Depends(g
             forensic_score=final_result["forgery_score"],
             risk_level=final_result["risk_level"],
             full_result=final_result,
+            heatmaps=heatmaps, # Save heatmap paths
             created_at=datetime.utcnow()
         )
         db.add(record)

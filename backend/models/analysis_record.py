@@ -11,4 +11,5 @@ class AnalysisRecord(Base):
     forensic_score = Column(Float, nullable=False)
     risk_level = Column(String, nullable=False)
     full_result = Column(JSON, nullable=False)
+    heatmaps = Column(JSON, nullable=True) # New column for heatmap file paths
     created_at = Column(DateTime, default=datetime.utcnow)

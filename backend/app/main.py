@@ -1,8 +1,10 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles # Import StaticFiles
 from backend.api.vision_api import router as vision_router
-from backend.api.analysis_history import router as analysis_history_router # Import new router
+from backend.api.analysis_history import router as analysis_history_router
 from backend.app.config import settings
-from backend.app.database import Base, engine # Import Base and engine
+from backend.app.database import Base, engine
+import os # Import os
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -15,8 +17,14 @@ app = FastAPI(
 async def startup_event():
     Base.metadata.create_all(bind=engine)
 
+# Mount static files directory for heatmaps
+# Ensure the 'heatmaps' directory exists relative to the backend/app directory
+heatmaps_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "heatmaps")
+os.makedirs(heatmaps_dir, exist_ok=True)
+app.mount("/heatmaps", StaticFiles(directory=heatmaps_dir), name="heatmaps")
+
 app.include_router(vision_router)
-app.include_router(analysis_history_router) # Include new router
+app.include_router(analysis_history_router)
 
 @app.get("/")
 async def read_root():
