@@ -1,16 +1,1 @@
-fastapi==0.111.0
-uvicorn==0.30.1
-torch
-torchvision
-transformers
-datasets
-sentencepiece
-accelerate
-opencv-python
-numpy
-Pillow
-scikit-image
-scipy
-einops
-huggingface_hub
-timm
+reportlab
