@@ -12,9 +12,11 @@ import SignupPage from "./pages/auth/signup";
 import ResetPasswordPage from "./pages/auth/reset-password";
 import HistoryPage from "./pages/dashboard/history";
 import AnalysisDetailPage from "./pages/dashboard/analysis/[id]";
+import DashboardHome from "./pages/dashboard/DashboardHome"; // New import
 import SecurityPage from "./pages/SecurityPage";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { MainLayout } from "@/layouts/MainLayout";
+import { DashboardLayout } from "@/layouts/DashboardLayout"; // New import
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -30,19 +32,27 @@ const App = () => (
           <AuthProvider>
             <Routes>
               {/* Public Routes */}
-              <Route path="/" element={<MainLayout><Index /></MainLayout>} /> {/* Use Index directly within MainLayout */}
+              <Route path="/" element={<MainLayout><Index /></MainLayout>} />
               <Route path="/pricing" element={<MainLayout><Pricing /></MainLayout>} />
-              <Route path="/security" element={<MainLayout><SecurityPage /></MainLayout>} /> {/* Ensure SecurityPage also uses MainLayout */}
+              <Route path="/security" element={<MainLayout><SecurityPage /></MainLayout>} />
               <Route path="/auth/login" element={<LoginPage />} />
               <Route path="/auth/signup" element={<SignupPage />} />
               <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
 
               {/* Protected Routes */}
               <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout><DashboardHome /></DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/analyze"
                 element={
                   <ProtectedRoute>
-                    <MainLayout><AnalyzeDocument /></MainLayout>
+                    <DashboardLayout><AnalyzeDocument /></DashboardLayout>
                   </ProtectedRoute>
                 }
               />
@@ -50,7 +60,7 @@ const App = () => (
                 path="/dashboard/history"
                 element={
                   <ProtectedRoute>
-                    <MainLayout><HistoryPage /></MainLayout> {/* Ensure HistoryPage also uses MainLayout */}
+                    <DashboardLayout><HistoryPage /></DashboardLayout>
                   </ProtectedRoute>
                 }
               />
@@ -58,7 +68,7 @@ const App = () => (
                 path="/dashboard/analysis/:id"
                 element={
                   <ProtectedRoute>
-                    <MainLayout><AnalysisDetailPage /></MainLayout> {/* Ensure AnalysisDetailPage also uses MainLayout */}
+                    <DashboardLayout><AnalysisDetailPage /></DashboardLayout>
                   </ProtectedRoute>
                 }
               />
