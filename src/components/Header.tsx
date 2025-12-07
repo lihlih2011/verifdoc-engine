@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sheet";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"; // Import Tooltip components
 
 export const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -61,9 +62,22 @@ export const Header = () => {
           ))}
         </nav>
 
-        {/* Right: ThemeSwitcher and Mobile Menu */}
+        {/* Right: ThemeSwitcher, VerifDoc Seal, and Mobile Menu */}
         <div className="flex items-center space-x-2">
           <ThemeSwitcher />
+          {/* VerifDoc Seal with Tooltip */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <img
+                src="/verifdoc-seal.svg"
+                alt="VerifDoc Certified"
+                className="h-[38px] w-[38px] object-contain"
+              />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Certifié par l’infrastructure forensique VerifDoc™</p>
+            </TooltipContent>
+          </Tooltip>
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>

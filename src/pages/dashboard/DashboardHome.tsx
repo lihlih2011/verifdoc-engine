@@ -82,10 +82,16 @@ const DashboardHome = () => {
 
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-8">
         {stats.map((stat, index) => (
-          <Card key={index} className="shadow-sm hover:shadow-md transition-shadow duration-300">
+          <Card key={index} className="shadow-sm hover:shadow-md transition-shadow duration-300 relative"> {/* Added relative positioning */}
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
               {stat.icon}
+              {/* Small seal icon */}
+              <img
+                src="/verifdoc-seal.svg"
+                alt="VerifDoc Seal"
+                className="absolute top-2 right-2 h-14 w-14 object-contain opacity-60" // Positioned and styled
+              />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>

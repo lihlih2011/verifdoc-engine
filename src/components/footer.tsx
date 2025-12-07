@@ -53,9 +53,14 @@ export const Footer = () => {
 
       <Separator className="my-10" />
 
-      {/* Bottom Bar: Copyright */}
-      <div className="container mx-auto max-w-6xl text-center text-xs text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} VerifDoc – Tous droits réservés.</p>
+      {/* Bottom Bar: Copyright with mini-seal */}
+      <div className="container mx-auto max-w-6xl text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
+        <img
+          src="/verifdoc-seal.svg"
+          alt="VerifDoc Seal"
+          className="h-5 w-5 object-contain"
+        />
+        <p>VerifDoc™ — Infrastructure d’analyse documentaire certifiée.</p>
       </div>
     </footer>
   );
