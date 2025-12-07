@@ -24,7 +24,8 @@ import {
   ScrollText,
 } from "lucide-react";
 import Hero from "@/components/Hero";
-import WhyVerifDoc from "@/components/WhyVerifDoc"; // Import the new WhyVerifDoc component
+import WhyVerifDoc from "@/components/WhyVerifDoc";
+import HowItWorks from "@/components/HowItWorks"; // Import the new HowItWorks component
 
 const Index = () => {
   const features = [
@@ -139,32 +140,7 @@ const Index = () => {
       </section>
 
       {/* HOW IT WORKS SECTION */}
-      <section className="w-full py-16 bg-muted/30">
-        <div className="container mx-auto max-w-6xl px-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-foreground mb-12">
-            Comment ça marche ?
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            {howItWorksSteps.map((step, index) => (
-              <div key={index} className="flex flex-col items-center p-4">
-                <div className="relative mb-6">
-                  <div className="p-4 rounded-full bg-primary/10 border border-primary/20">
-                    {step.icon}
-                  </div>
-                  <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full h-8 w-8 flex items-center justify-center text-sm font-bold">
-                    {index + 1}
-                  </span>
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">
-                  {step.title}
-                </h3>
-                <p className="text-muted-foreground">{step.description}</p>
-              </div>
-            ))}
-          </div>
-          <Separator className="my-12 max-w-2xl mx-auto" />
-        </div>
-      </section>
+      <HowItWorks /> {/* Render the new HowItWorks component here */}
 
       {/* PRICING SECTION */}
       <section className="w-full py-16">
