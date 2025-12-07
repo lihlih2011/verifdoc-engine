@@ -13,7 +13,7 @@ import SignupPage from "./pages/auth/signup";
 import ResetPasswordPage from "./pages/auth/reset-password";
 import HistoryPage from "./pages/dashboard/history";
 import AnalysisDetailPage from "./pages/dashboard/analysis/[id]";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/ThemeProvider"; // Updated import
 import { MainLayout } from "@/layouts/MainLayout";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
