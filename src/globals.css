@@ -90,12 +90,19 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 @layer base {
   * {
     @apply border-border;
   }
 
   body {
+    background: #F8FAFC; /* neutralBg */
+    color: #1E293B; /* textMain */
+    font-family: system-ui, sans-serif;
     @apply bg-background text-foreground;
   }
 }
