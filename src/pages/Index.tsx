@@ -25,42 +25,11 @@ import {
 } from "lucide-react";
 import Hero from "@/components/Hero";
 import WhyVerifDoc from "@/components/WhyVerifDoc";
-import HowItWorks from "@/components/HowItWorks"; // Import the new HowItWorks component
+import HowItWorks from "@/components/HowItWorks";
+import TrustSection from "@/components/TrustSection"; // New import
+import AnalyseModules from "@/components/AnalyseModules"; // New import
 
 const Index = () => {
-  const features = [
-    {
-      icon: <ScanText className="h-6 w-6 text-primary" />,
-      title: "OCR IA Multi-langues",
-      description: "Extraction de texte intelligente et précise dans plus de 100 langues.",
-    },
-    {
-      icon: <ShieldCheck className="h-6 w-6 text-primary" />,
-      title: "Détection de falsification locale (ELA++)",
-      description: "Analyse des anomalies de compression pour révéler les modifications d'image.",
-    },
-    {
-      icon: <Fingerprint className="h-6 w-6 text-primary" />,
-      title: "Empreintes GAN / NoisePrint++",
-      description: "Identification des signatures uniques laissées par les modèles génératifs (GAN).",
-    },
-    {
-      icon: <Copy className="h-6 w-6 text-primary" />,
-      title: "Détection Copy-Move (80 algorithmes avancés)",
-      description: "Localisation des régions dupliquées au sein d'un document pour masquer des altérations.",
-    },
-    {
-      icon: <Sparkles className="h-6 w-6 text-primary" />,
-      title: "Diffusion Forensics (détection IA générative)",
-      description: "Détection des images générées ou modifiées par des modèles de diffusion IA.",
-    },
-    {
-      icon: <Blend className="h-6 w-6 text-primary" />,
-      title: "Fusion Engine — Score Forensic 0–100",
-      description: "Un moteur propriétaire qui combine les résultats de tous les modules pour un score unique et fiable.",
-    },
-  ];
-
   const howItWorksSteps = [
     {
       icon: <FileUp className="h-8 w-8 text-primary" />,
@@ -96,51 +65,13 @@ const Index = () => {
       <WhyVerifDoc />
 
       {/* TRUST BADGES / CLIENT LOGOS */}
-      <section className="w-full py-12 bg-muted/30">
-        <div className="container mx-auto max-w-6xl px-6 text-center">
-          <p className="text-lg text-muted-foreground mb-8">
-            Nos solutions sont conçues pour les secteurs exigeants :
-          </p>
-          <div className="flex flex-wrap justify-center items-center gap-x-8 gap-y-4 text-muted-foreground/80 font-medium text-xl">
-            <span className="hover:text-foreground transition-colors">Banques</span>
-            <span className="hover:text-foreground transition-colors">Assurances</span>
-            <span className="hover:text-foreground transition-colors">Administrations</span>
-            <span className="hover:text-foreground transition-colors">Cabinets d’experts</span>
-            <span className="hover:text-foreground transition-colors">Startups tech</span>
-          </div>
-        </div>
-      </section>
+      <TrustSection /> {/* Using the new TrustSection component */}
 
       {/* FEATURES SECTION */}
-      <section className="w-full py-16">
-        <div className="container mx-auto max-w-6xl px-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-foreground mb-12">
-            Une analyse forensic multicouche
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className="flex flex-col items-center text-center p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
-                <CardHeader className="pb-4">
-                  <div className="p-3 rounded-full bg-primary/10 mb-4">
-                    {feature.icon}
-                  </div>
-                  <CardTitle className="text-xl font-semibold text-foreground">
-                    {feature.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-muted-foreground">
-                    {feature.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      <AnalyseModules /> {/* Using the new AnalyseModules component */}
 
       {/* HOW IT WORKS SECTION */}
-      <HowItWorks /> {/* Render the new HowItWorks component here */}
+      <HowItWorks />
 
       {/* PRICING SECTION */}
       <section className="w-full py-16">
