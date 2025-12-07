@@ -23,7 +23,8 @@ import {
   Brain,
   ScrollText,
 } from "lucide-react";
-import Hero from "@/components/Hero"; // Import the new Hero component
+import Hero from "@/components/Hero";
+import WhyVerifDoc from "@/components/WhyVerifDoc"; // Import the new WhyVerifDoc component
 
 const Index = () => {
   const features = [
@@ -88,7 +89,10 @@ const Index = () => {
   return (
     <div className="flex flex-col items-center justify-center space-y-20 py-16">
       {/* HERO SECTION */}
-      <Hero /> {/* Render the new Hero component here */}
+      <Hero />
+
+      {/* WHY VERIFDOC SECTION */}
+      <WhyVerifDoc />
 
       {/* TRUST BADGES / CLIENT LOGOS */}
       <section className="w-full py-12 bg-muted/30">
