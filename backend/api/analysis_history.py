@@ -23,7 +23,8 @@ async def list_analysis_records(db: Session = Depends(get_db)):
             "filename": record.filename,
             "forensic_score": record.forensic_score,
             "risk_level": record.risk_level,
-            "created_at": record.created_at.isoformat() # Convert datetime to ISO format string
+            "created_at": record.created_at.isoformat(), # Convert datetime to ISO format string
+            "integrity_hash": record.integrity_hash # NEW: Include integrity hash
         }
         for record in records
     ]
@@ -43,5 +44,7 @@ async def get_analysis_detail(record_id: int, db: Session = Depends(get_db)):
         "risk_level": record.risk_level,
         "created_at": record.created_at.isoformat(),
         "full_result": record.full_result,
-        "heatmaps": record.heatmaps # Include heatmap paths
+        "heatmaps": record.heatmaps, # Include heatmap paths
+        "integrity_hash": record.integrity_hash, # NEW: Include integrity hash
+        "report_file_path": record.report_file_path # NEW: Include report file path
     }

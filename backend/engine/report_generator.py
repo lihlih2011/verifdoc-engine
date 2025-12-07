@@ -124,6 +124,12 @@ class ReportGenerator:
         Story.append(Paragraph(f"Date du rapport: {datetime.now().strftime('%d/%m/%Y')}", normal_style))
         Story.append(Paragraph(f"Signature: {settings.PROJECT_NAME}", bold_style))
 
+        # NEW: Integrity Hash
+        integrity_hash = record.get('integrity_hash')
+        if integrity_hash:
+            Story.append(Spacer(1, 0.2 * inch))
+            Story.append(Paragraph(f"<b>Hash d’intégrité (SHA-256):</b> <font face='Helvetica-Oblique' size='8'>{integrity_hash}</font>", normal_style))
+
         doc.build(Story)
         
         pdf_bytes = buffer.getvalue()

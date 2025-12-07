@@ -2,18 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { MainLayout } from "@/layouts/MainLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, FileText, CalendarDays, FlaskConical, ArrowLeft } from "lucide-react";
-import { RiskBadge } from "@/components/dashboard/RiskBadge";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { HeatmapTabs } from "@/components/dashboard/HeatmapTabs";
-import { DownloadPdfButton } from "@/components/dashboard/DownloadPdfButton"; // New import
+import { AnalysisResultDisplay } from "@/components/dashboard/AnalysisResultDisplay"; // New import
 
 interface AnalysisDetailResult {
   id: number;
@@ -50,6 +44,8 @@ interface AnalysisDetailResult {
     copymove?: string;
     diffusion?: string;
   };
+  integrity_hash?: string; // New field
+  report_file_path?: string; // New field
 }
 
 const AnalysisDetailPage = () => {
@@ -57,7 +53,6 @@ const AnalysisDetailPage = () => {
   const [analysis, setAnalysis] = useState<AnalysisDetailResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showRawJson, setShowRawJson] = useState(false);
 
   useEffect(() => {
     const fetchAnalysisDetail = async () => {
@@ -85,7 +80,7 @@ const AnalysisDetailPage = () => {
 
   if (loading) {
     return (
-      <MainLayout>
+      <DashboardLayout>
         <div className="container mx-auto py-8 px-4 max-w-4xl">
           <Skeleton className="h-10 w-3/4 mb-6" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -95,13 +90,13 @@ const AnalysisDetailPage = () => {
           </div>
           <Skeleton className="h-12 w-full mt-8" />
         </div>
-      </MainLayout>
+      </DashboardLayout>
     );
   }
 
   if (error) {
     return (
-      <MainLayout>
+      <DashboardLayout>
         <div className="container mx-auto py-8 px-4 max-w-4xl">
           <Alert variant="destructive">
             <AlertTitle>Erreur</AlertTitle>
@@ -114,13 +109,13 @@ const AnalysisDetailPage = () => {
             </Link>
           </Button>
         </div>
-      </MainLayout>
+      </DashboardLayout>
     );
   }
 
   if (!analysis) {
     return (
-      <MainLayout>
+      <DashboardLayout>
         <div className="container mx-auto py-8 px-4 max-w-4xl">
           <Alert variant="destructive">
             <AlertTitle>Analyse introuvable</AlertTitle>
@@ -135,168 +130,12 @@ const AnalysisDetailPage = () => {
             </Link>
           </Button>
         </div>
-      </MainLayout>
+      </DashboardLayout>
     );
   }
 
-  const { filename, forensic_score, created_at, full_result, heatmaps } = analysis;
-  const { module_scores, explanation } = full_result;
-
-  return (
-    <MainLayout>
-      <div className="container mx-auto py-8 px-4 max-w-5xl">
-        <div className="flex justify-between items-center mb-6">
-          <Button asChild variant="outline">
-            <Link to="/dashboard/history">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Retour à l'historique
-            </Link>
-          </Button>
-          {/* Download PDF Button */}
-          <DownloadPdfButton analysisId={parseInt(id!)} />
-        </div>
-
-        {/* Header Summary */}
-        <Card className="mb-8 shadow-lg">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-3xl font-bold flex items-center gap-3">
-                <FileText className="h-8 w-8 text-primary" />
-                Analyse de "{filename}"
-              </CardTitle>
-              <RiskBadge score={forensic_score} />
-            </div>
-            <CardDescription className="flex items-center gap-2 text-muted-foreground mt-2">
-              <CalendarDays className="h-4 w-4" />
-              Analysé le {format(new Date(created_at), "dd MMMM yyyy à HH:mm", { locale: fr })}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between text-lg font-medium">
-              <span>Score global de falsification :</span>
-              <span className="text-2xl font-extrabold text-foreground">
-                {forensic_score}%
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Fusion Engine Summary */}
-        <Card className="mb-8 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <FlaskConical className="h-6 w-6 text-primary" />
-              Résumé du moteur de fusion
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-lg font-medium mb-2">Interprétation du risque :</p>
-              <p className="text-muted-foreground">{explanation.summary}</p>
-            </div>
-            <Separator />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {Object.entries(explanation).map(([key, value]) => (
-                key !== "summary" && (
-                  <div key={key} className="flex flex-col space-y-1">
-                    <span className="font-semibold capitalize text-foreground">
-                      {key.replace(/_/g, ' ')}:
-                    </span>
-                    <span className="text-sm text-muted-foreground">{value as string}</span>
-                  </div>
-                )
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Module-by-Module Results */}
-        <h2 className="text-2xl font-bold text-foreground mb-6">Résultats détaillés par module</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>OCR IA</CardTitle>
-              <CardDescription>Score: {(module_scores.ocr * 100).toFixed(1)}%</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">{explanation.ocr}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>FR-DETR (Falsification Visuelle)</CardTitle>
-              <CardDescription>Score: {(module_scores.frdetr * 100).toFixed(1)}%</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">{explanation.visual}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Diffusion Forensics (IA Générative)</CardTitle>
-              <CardDescription>Score: {(module_scores.diffusion * 100).toFixed(1)}%</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">{explanation.inpainting}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>GAN / NoisePrint++</CardTitle>
-              <CardDescription>Score: {(module_scores.noiseprint * 100).toFixed(1)}%</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">{explanation.ai_noise}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>ELA++ (Anomalies de Compression)</CardTitle>
-              <CardDescription>Score: {(module_scores.ela * 100).toFixed(1)}%</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">{explanation.compression}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Copy-Move Detection</CardTitle>
-              <CardDescription>Score: {(module_scores.copymove * 100).toFixed(1)}%</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">{explanation.duplication}</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Heatmap Visualizations */}
-        {heatmaps && (
-          <Card className="mt-8 p-6 shadow-lg">
-            <h2 className="text-2xl font-bold text-foreground mb-4">Heatmaps forensic</h2>
-            <p className="text-muted-foreground mb-6">
-              Ces cartes thermiques montrent les zones détectées comme potentiellement manipulées.
-            </p>
-            <HeatmapTabs heatmaps={heatmaps} />
-          </Card>
-        )}
-
-        {/* JSON Debug Toggle */}
-        <Button
-          variant="outline"
-          className="w-full mt-8"
-          onClick={() => setShowRawJson(!showRawJson)}
-        >
-          {showRawJson ? "Masquer JSON brut" : "Afficher JSON brut"}
-        </Button>
-
-        {showRawJson && (
-          <pre className="mt-4 p-4 bg-muted rounded-md text-sm overflow-x-auto animate-in fade-in duration-300">
-            {JSON.stringify(analysis, null, 2)}
-          </pre>
-        )}
-      </div>
-    </MainLayout>
-  );
+  // Pass all analysis data to the display component
+  return <AnalysisResultDisplay analysis={analysis} />;
 };
 
 export default AnalysisDetailPage;

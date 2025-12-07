@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -13,8 +13,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, FileText, CheckCircle2, BarChart2 } from "lucide-react";
+import { ArrowRight, FileText, CheckCircle2, BarChart2, ShieldCheck, AlertTriangle, Link as LinkIcon } from "lucide-react"; // Added ShieldCheck, AlertTriangle, LinkIcon
 import { DashboardLayout } from "@/layouts/DashboardLayout";
+import { Skeleton } from "@/components/ui/skeleton"; // For loading state
+
+interface RecentAnalysisRecord {
+  id: number;
+  filename: string;
+  forensic_score: number;
+  risk_level: string;
+  created_at: string;
+  integrity_hash?: string; // New field
+}
 
 const DashboardHome = () => {
   const stats = [
@@ -38,6 +48,8 @@ const DashboardHome = () => {
     },
   ];
 
+  // This `recentAnalyses` array is static, I will keep it for the table,
+  // but fetch dynamic data for the new widget.
   const recentAnalyses = [
     {
       document: "Facture_Orange_2023.pdf",
@@ -58,6 +70,28 @@ const DashboardHome = () => {
       score: 88,
     },
   ];
+
+  const [recentAnalysesForWidget, setRecentAnalysesForWidget] = useState<RecentAnalysisRecord[]>([]);
+  const [loadingRecentAnalysesForWidget, setLoadingRecentAnalysesForWidget] = useState(true);
+  const [errorRecentAnalysesForWidget, setErrorRecentAnalysesForWidget] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchRecentAnalyses = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/analysis/list");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data: RecentAnalysisRecord[] = await response.json();
+        setRecentAnalysesForWidget(data.slice(0, 5)); // Get last 5 for the widget
+      } catch (err: any) {
+        setErrorRecentAnalysesForWidget(err.message || "Failed to load recent analyses for widget.");
+      } finally {
+        setLoadingRecentAnalysesForWidget(false);
+      }
+    };
+    fetchRecentAnalyses();
+  }, []);
 
   const getRiskBadge = (score: number) => {
     if (score < 40) {
@@ -110,36 +144,92 @@ const DashboardHome = () => {
         </Button>
       </div>
 
-      <Card className="mt-10 shadow-sm hover:shadow-md transition-shadow duration-300">
-        <CardHeader>
-          <CardTitle>Analyses récentes</CardTitle>
-          <CardDescription>Vos 3 dernières analyses.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Document</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-center">Score</TableHead>
-                <TableHead className="text-center">Risque</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recentAnalyses.map((analysis, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">{analysis.document}</TableCell>
-                  <TableCell>{analysis.date}</TableCell>
-                  <TableCell>{analysis.status}</TableCell>
-                  <TableCell className="text-center">{analysis.score}%</TableCell>
-                  <TableCell className="text-center">{getRiskBadge(analysis.score)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
+        <div className="lg:col-span-2">
+          <Card className="shadow-sm hover:shadow-md transition-shadow duration-300">
+            <CardHeader>
+              <CardTitle>Analyses récentes</CardTitle>
+              <CardDescription>Vos 3 dernières analyses.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Document</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead className="text-center">Score</TableHead>
+                    <TableHead className="text-center">Risque</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentAnalyses.map((analysis, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">{analysis.document}</TableCell>
+                      <TableCell>{analysis.date}</TableCell>
+                      <TableCell>{analysis.status}</TableCell>
+                      <TableCell className="text-center">{analysis.score}%</TableCell>
+                      <TableCell className="text-center">{getRiskBadge(analysis.score)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* NEW: Sceau numérique Widget */}
+        <Card className="shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              Sceau numérique
+            </CardTitle>
+            <CardDescription>Derniers hashes d'intégrité générés.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loadingRecentAnalysesForWidget ? (
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-full" />
+              </div>
+            ) : errorRecentAnalysesForWidget ? (
+              <Alert variant="destructive">
+                <AlertTitle>Erreur</AlertTitle>
+                <AlertDescription>{errorRecentAnalysesForWidget}</AlertDescription>
+              </Alert>
+            ) : recentAnalysesForWidget.length === 0 ? (
+              <p className="text-muted-foreground text-sm">Aucun hash généré récemment.</p>
+            ) : (
+              <ul className="space-y-2">
+                {recentAnalysesForWidget.map((analysis, index) => (
+                  <li key={analysis.id} className="flex items-center justify-between text-sm">
+                    <Link to={`/dashboard/analysis/${analysis.id}`} className="flex items-center gap-2 hover:underline text-foreground">
+                      <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-mono text-xs">
+                        {analysis.integrity_hash ? `${analysis.integrity_hash.substring(0, 12)}...` : "N/A"}
+                      </span>
+                    </Link>
+                    {analysis.integrity_hash ? (
+                      <Badge variant="secondary" className="bg-green-100 text-green-700">
+                        <ShieldCheck className="mr-1 h-3 w-3" /> Disponible
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="bg-red-100 text-red-700">
+                        <AlertTriangle className="mr-1 h-3 w-3" /> Non généré
+                      </Badge>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Button asChild variant="link" className="mt-4 p-0 h-auto">
+              <Link to="/dashboard/history">Voir toutes les analyses</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </DashboardLayout>
   );
 };
