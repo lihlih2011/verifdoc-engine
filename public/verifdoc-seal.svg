@@ -1,0 +1,29 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Path for the text to follow around the outer circle -->
+    <path id="circlePath" d="M 100, 100 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0" />
+  </defs>
+
+  <!-- Outer Circle -->
+  <circle cx="100" cy="100" r="85" stroke="#1E293B" stroke-width="2" />
+
+  <!-- Inner Circle -->
+  <circle cx="100" cy="100" r="60" stroke="#1E293B" stroke-width="1.5" />
+
+  <!-- Text around the seal -->
+  <text fill="#1E293B" font-family="Arial, sans-serif" font-size="10" font-weight="bold" letter-spacing="1.5">
+    <textPath href="#circlePath" startOffset="50%" text-anchor="middle">
+      VERIFDOC™ • CERTIFIED FORENSIC ANALYSIS • INTEGRITY SEAL
+    </textPath>
+  </text>
+
+  <!-- Center Icon: Shield with Checkmark -->
+  <g transform="translate(75, 70) scale(0.5)">
+    <!-- Shield Shape -->
+    <path d="M50 0 L0 20 L0 55 C0 85 50 100 50 100 C50 100 100 85 100 55 L100 20 L50 0 Z" 
+          stroke="#1E293B" stroke-width="4" fill="none" />
+    <!-- Checkmark -->
+    <polyline points="25 50 45 70 75 30" 
+              stroke="#1E293B" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>
