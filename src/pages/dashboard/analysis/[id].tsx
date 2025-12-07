@@ -12,6 +12,7 @@ import { RiskBadge } from "@/components/dashboard/RiskBadge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
+import { HeatmapTabs } from "@/components/dashboard/HeatmapTabs"; // New import
 
 interface AnalysisDetailResult {
   id: number;
@@ -41,6 +42,12 @@ interface AnalysisDetailResult {
     };
     raw_output: string;
     record_id: number;
+  };
+  heatmaps?: { // Added heatmaps property
+    ela?: string;
+    gan?: string;
+    copymove?: string;
+    diffusion?: string;
   };
 }
 
@@ -131,7 +138,7 @@ const AnalysisDetailPage = () => {
     );
   }
 
-  const { filename, forensic_score, created_at, full_result } = analysis;
+  const { filename, forensic_score, created_at, full_result, heatmaps } = analysis;
   const { module_scores, explanation } = full_result;
 
   return (
@@ -257,28 +264,16 @@ const AnalysisDetailPage = () => {
           </Card>
         </div>
 
-        {/* Heatmap Placeholders */}
-        <h2 className="text-2xl font-bold text-foreground mb-6">Visualisations (Heatmaps)</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card className="flex items-center justify-center h-48 bg-muted/50 border-dashed border-2 border-border text-muted-foreground">
-            Heatmap OCR non encore générée
+        {/* Heatmap Visualizations */}
+        {heatmaps && (
+          <Card className="mt-8 p-6 shadow-lg">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Heatmaps forensic</h2>
+            <p className="text-muted-foreground mb-6">
+              Ces cartes thermiques montrent les zones détectées comme potentiellement manipulées.
+            </p>
+            <HeatmapTabs heatmaps={heatmaps} />
           </Card>
-          <Card className="flex items-center justify-center h-48 bg-muted/50 border-dashed border-2 border-border text-muted-foreground">
-            Heatmap FR-DETR non encore générée
-          </Card>
-          <Card className="flex items-center justify-center h-48 bg-muted/50 border-dashed border-2 border-border text-muted-foreground">
-            Heatmap Diffusion Forensics non encore générée
-          </Card>
-          <Card className="flex items-center justify-center h-48 bg-muted/50 border-dashed border-2 border-border text-muted-foreground">
-            Heatmap GAN / NoisePrint non encore générée
-          </Card>
-          <Card className="flex items-center justify-center h-48 bg-muted/50 border-dashed border-2 border-border text-muted-foreground">
-            Heatmap ELA non encore générée
-          </Card>
-          <Card className="flex items-center justify-center h-48 bg-muted/50 border-dashed border-2 border-border text-muted-foreground">
-            Heatmap Copy-Move non encore générée
-          </Card>
-        </div>
+        )}
 
         {/* JSON Debug Toggle */}
         <Button
