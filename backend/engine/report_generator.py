@@ -24,14 +24,16 @@ class ReportGenerator:
             return "Modéré"
         return "Élevé"
 
-    def generate_report(self, record: dict, heatmaps: dict) -> str:
+    def generate_report(self, record: dict, heatmaps: dict) -> tuple[str, bytes]:
         """
         Generates a PDF forensic report for a given analysis record.
+        Returns the file path and the raw PDF bytes.
         """
         report_filename = f"rapport_verifdoc_{record['id']}_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
         report_filepath = os.path.join(self.report_dir, report_filename)
 
-        doc = SimpleDocTemplate(report_filepath, pagesize=A4)
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4)
         styles = getSampleStyleSheet()
         Story = []
 
@@ -123,4 +125,11 @@ class ReportGenerator:
         Story.append(Paragraph(f"Signature: {settings.PROJECT_NAME}", bold_style))
 
         doc.build(Story)
-        return report_filepath
+        
+        pdf_bytes = buffer.getvalue()
+        
+        # Save the PDF to the file system
+        with open(report_filepath, "wb") as f:
+            f.write(pdf_bytes)
+
+        return report_filepath, pdf_bytes

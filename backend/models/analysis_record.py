@@ -12,4 +12,6 @@ class AnalysisRecord(Base):
     risk_level = Column(String, nullable=False)
     full_result = Column(JSON, nullable=False)
     heatmaps = Column(JSON, nullable=True) # New column for heatmap file paths
+    report_file_path = Column(String, nullable=True) # New column for the path to the generated PDF report
+    integrity_hash = Column(String, nullable=True) # New column for the SHA-256 hash of the report
     created_at = Column(DateTime, default=datetime.utcnow)

@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from backend.app.database import get_db
 from backend.models.analysis_record import AnalysisRecord
 from backend.engine.report_generator import ReportGenerator
+from backend.utils.hash_utils import compute_sha256 # Import the hash utility
 import os
 
 router = APIRouter(prefix="/report", tags=["report"])
@@ -32,7 +33,19 @@ async def get_analysis_report(record_id: int, db: Session = Depends(get_db)):
     }
 
     try:
-        report_path = report_generator.generate_report(record_dict, heatmaps_data)
+        # Generate the report and get both the file path and the raw PDF bytes
+        report_path, pdf_bytes = report_generator.generate_report(record_dict, heatmaps_data)
+        
+        # Compute the hash of the generated PDF
+        integrity_hash = compute_sha256(pdf_bytes)
+
+        # Update the record in the database with the report file path and its hash
+        record.report_file_path = report_path
+        record.integrity_hash = integrity_hash
+        db.add(record)
+        db.commit()
+        db.refresh(record)
+
         return FileResponse(
             path=report_path,
             filename=f"rapport_verifdoc_{record_id}.pdf",
