@@ -5,24 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, FileText, Image as ImageIcon } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
+import { Loader2, FileText, Image as ImageIcon, XCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
-const AnalyzeDocument = () => {
+const NewAnalyse = () => {
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [showRawJson, setShowRawJson] = useState(false);
+  const navigate = useNavigate();
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0] || null;
     setFile(selectedFile);
-    setResult(null); // Clear previous results
     setError(null); // Clear previous errors
 
     if (selectedFile) {
@@ -42,14 +39,19 @@ const AnalyzeDocument = () => {
     }
   };
 
+  const handleRemoveFile = () => {
+    setFile(null);
+    setFilePreview(null);
+    setError(null);
+  };
+
   const handleAnalyze = async () => {
     if (!file) {
-      setError("Please select a file to analyze.");
+      setError("Veuillez sélectionner un fichier à analyser.");
       return;
     }
 
     setLoading(true);
-    setResult(null);
     setError(null);
 
     const formData = new FormData();
@@ -63,34 +65,29 @@ const AnalyzeDocument = () => {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+        throw new Error(errorData.error || `Erreur HTTP! statut: ${res.status}`);
       }
 
       const data = await res.json();
-      setResult(data);
+      toast.success("Analyse lancée avec succès !");
+      // Redirect to the analysis detail page, passing the analysis ID
+      navigate(`/dashboard/analysis/${data.record_id}`);
     } catch (e: any) {
-      setError(e.message || "An unexpected error occurred during analysis.");
+      setError(e.message || "Une erreur inattendue est survenue pendant l'analyse.");
+      toast.error(e.message || "Échec de l'analyse.");
     } finally {
       setLoading(false);
     }
   };
 
-  const getRiskLevel = (score: number) => {
-    if (score < 40) return { text: "Faible", color: "bg-green-500" };
-    if (score >= 40 && score <= 70) return { text: "Modéré", color: "bg-orange-500" };
-    return { text: "Élevé", color: "bg-red-500" };
-  };
-
-  const riskLevel = result ? getRiskLevel(result.forgery_score) : null;
-
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="text-center mb-10">
         <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-foreground mb-3">
-          Analyse de document
+          Nouvelle analyse
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Détection avancée de falsification via IA pour garantir l'authenticité de vos documents.
+          Déposez un document et lancez l’analyse IA en toute simplicité.
         </p>
       </div>
 
@@ -109,7 +106,7 @@ const AnalyzeDocument = () => {
             </div>
 
             {file && (
-              <div className="mt-4 p-4 border rounded-md flex items-center space-x-4 bg-muted/50">
+              <div className="mt-4 p-4 border rounded-md flex items-center space-x-4 bg-muted/50 relative">
                 {filePreview === "pdf" ? (
                   <FileText className="h-12 w-12 text-primary" />
                 ) : filePreview ? (
@@ -121,6 +118,15 @@ const AnalyzeDocument = () => {
                   <p className="font-medium text-foreground">{file.name}</p>
                   <p className="text-sm text-muted-foreground">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
+                  onClick={handleRemoveFile}
+                  aria-label="Supprimer le fichier"
+                >
+                  <XCircle className="h-5 w-5" />
+                </Button>
               </div>
             )}
 
@@ -142,74 +148,14 @@ const AnalyzeDocument = () => {
                   Analyse en cours…
                 </>
               ) : (
-                "Analyser le document"
+                "Lancer l’analyse IA"
               )}
             </Button>
           </div>
         </CardContent>
       </Card>
-
-      {loading && (
-        <Card className="max-w-3xl mx-auto mt-8 p-6 shadow-lg">
-          <div className="flex items-center space-x-4">
-            <Skeleton className="h-12 w-12 rounded-full" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-[250px]" />
-              <Skeleton className="h-4 w-[200px]" />
-            </div>
-          </div>
-          <p className="text-center text-muted-foreground mt-4">Analyse en cours… Veuillez patienter</p>
-        </Card>
-      )}
-
-      {result && (
-        <Card className="max-w-3xl mx-auto mt-8 p-6 shadow-lg animate-in fade-in duration-500">
-          <CardHeader className="p-0 mb-4">
-            <CardTitle className="text-2xl">Résultats de l'analyse</CardTitle>
-          </CardHeader>
-          <Separator className="mb-4" />
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <p className="text-lg font-medium">Score global de falsification :</p>
-              <Badge className={`text-lg px-4 py-2 ${riskLevel?.color}`}>
-                {result.forgery_score}% ({riskLevel?.text})
-              </Badge>
-            </div>
-            <div>
-              <p className="text-lg font-medium mb-2">Résumé de l'explication :</p>
-              <p className="text-muted-foreground">{result.explanation.summary}</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {Object.entries(result.explanation).map(([key, value]) => (
-                key !== "summary" && (
-                  <div key={key} className="flex items-center space-x-2">
-                    <Badge variant="secondary" className="capitalize">
-                      {key.replace(/_/g, ' ')}:
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">{value as string}</span>
-                  </div>
-                )
-              ))}
-            </div>
-          </div>
-
-          <Button
-            variant="outline"
-            className="w-full mt-8"
-            onClick={() => setShowRawJson(!showRawJson)}
-          >
-            {showRawJson ? "Masquer JSON brut" : "Afficher JSON brut"}
-          </Button>
-
-          {showRawJson && (
-            <pre className="mt-4 p-4 bg-muted rounded-md text-sm overflow-x-auto animate-in fade-in duration-300">
-              {JSON.stringify(result, null, 2)}
-            </pre>
-          )}
-        </Card>
-      )}
     </div>
   );
 };
 
-export default AnalyzeDocument;
+export default NewAnalyse;
