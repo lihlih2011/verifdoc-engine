@@ -12,7 +12,8 @@ import { RiskBadge } from "@/components/dashboard/RiskBadge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
-import { HeatmapTabs } from "@/components/dashboard/HeatmapTabs"; // New import
+import { HeatmapTabs } from "@/components/dashboard/HeatmapTabs";
+import { DownloadPdfButton } from "@/components/dashboard/DownloadPdfButton"; // New import
 
 interface AnalysisDetailResult {
   id: number;
@@ -43,7 +44,7 @@ interface AnalysisDetailResult {
     raw_output: string;
     record_id: number;
   };
-  heatmaps?: { // Added heatmaps property
+  heatmaps?: {
     ela?: string;
     gan?: string;
     copymove?: string;
@@ -144,12 +145,16 @@ const AnalysisDetailPage = () => {
   return (
     <MainLayout>
       <div className="container mx-auto py-8 px-4 max-w-5xl">
-        <Button asChild variant="outline" className="mb-6">
-          <Link to="/dashboard/history">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Retour à l'historique
-          </Link>
-        </Button>
+        <div className="flex justify-between items-center mb-6">
+          <Button asChild variant="outline">
+            <Link to="/dashboard/history">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Retour à l'historique
+            </Link>
+          </Button>
+          {/* Download PDF Button */}
+          <DownloadPdfButton analysisId={parseInt(id!)} />
+        </div>
 
         {/* Header Summary */}
         <Card className="mb-8 shadow-lg">
