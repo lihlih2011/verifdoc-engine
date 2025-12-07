@@ -3,8 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index"; // Keep Index for now, but it's not used for '/' anymore
-import Home from "./pages/Home"; // New import for the assembled landing page
+import Index from "./pages/Index";
 import AnalyzeDocument from "./pages/AnalyzeDocument";
 import Pricing from "./pages/pricing";
 import NotFound from "./pages/NotFound";
@@ -13,8 +12,8 @@ import SignupPage from "./pages/auth/signup";
 import ResetPasswordPage from "./pages/auth/reset-password";
 import HistoryPage from "./pages/dashboard/history";
 import AnalysisDetailPage from "./pages/dashboard/analysis/[id]";
-import SecurityPage from "./pages/SecurityPage"; // New import for SecurityPage
-import { ThemeProvider } from "@/components/ThemeProvider"; // Updated import
+import SecurityPage from "./pages/SecurityPage";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { MainLayout } from "@/layouts/MainLayout";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -31,9 +30,9 @@ const App = () => (
           <AuthProvider>
             <Routes>
               {/* Public Routes */}
-              <Route path="/" element={<Home />} /> {/* Use Home directly */}
+              <Route path="/" element={<MainLayout><Index /></MainLayout>} /> {/* Use Index directly within MainLayout */}
               <Route path="/pricing" element={<MainLayout><Pricing /></MainLayout>} />
-              <Route path="/security" element={<SecurityPage />} /> {/* New Security route */}
+              <Route path="/security" element={<MainLayout><SecurityPage /></MainLayout>} /> {/* Ensure SecurityPage also uses MainLayout */}
               <Route path="/auth/login" element={<LoginPage />} />
               <Route path="/auth/signup" element={<SignupPage />} />
               <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
@@ -51,7 +50,7 @@ const App = () => (
                 path="/dashboard/history"
                 element={
                   <ProtectedRoute>
-                    <HistoryPage />
+                    <MainLayout><HistoryPage /></MainLayout> {/* Ensure HistoryPage also uses MainLayout */}
                   </ProtectedRoute>
                 }
               />
@@ -59,7 +58,7 @@ const App = () => (
                 path="/dashboard/analysis/:id"
                 element={
                   <ProtectedRoute>
-                    <AnalysisDetailPage />
+                    <MainLayout><AnalysisDetailPage /></MainLayout> {/* Ensure AnalysisDetailPage also uses MainLayout */}
                   </ProtectedRoute>
                 }
               />
