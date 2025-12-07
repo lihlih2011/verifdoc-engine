@@ -1,0 +1,75 @@
+<svg width="100%" height="200" viewBox="0 0 1200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .step-card {
+      fill: #f0f4f8; /* Light pastel blue-gray */
+      stroke: #d9e2ec;
+      stroke-width: 1;
+    }
+    .step-text {
+      font-family: sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      fill: #4a5568; /* Darker gray for text */
+    }
+    .step-description {
+      font-family: sans-serif;
+      font-size: 16px;
+      fill: #718096; /* Muted gray for description */
+    }
+    .arrow {
+      fill: none;
+      stroke: #a0aec0; /* Medium gray for arrows */
+      stroke-width: 2;
+      marker-end: url(#arrowhead);
+    }
+    .icon {
+      fill: #667eea; /* Pastel purple for icons */
+    }
+    .icon-bg {
+      fill: #e0e7ff; /* Lighter pastel purple for icon background */
+    }
+  </style>
+
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#a0aec0" />
+    </marker>
+  </defs>
+
+  {/* Step 1: Téléversement sécurisé */}
+  <rect x="50" y="30" width="250" height="140" rx="15" ry="15" class="step-card"/>
+  <circle cx="175" cy="75" r="25" class="icon-bg"/>
+  <path class="icon" d="M175 60 L175 90 M160 75 L190 75 M175 60 L165 70 M175 60 L185 70 M175 90 L165 80 M175 90 L185 80 M175 60 C175 50 185 50 185 60 L185 70 C185 80 175 80 175 70 L175 60 Z" transform="translate(175, 75) scale(0.5) translate(-175, -75)"/>
+  <text x="175" y="120" text-anchor="middle" class="step-text">Téléversement</text>
+  <text x="175" y="145" text-anchor="middle" class="step-description">Sécurisé</text>
+
+  {/* Arrow 1 */}
+  <line x1="300" y1="100" x2="350" y2="100" class="arrow"/>
+
+  {/* Step 2: Analyse multicritère (180 points) */}
+  <rect x="350" y="30" width="250" height="140" rx="15" ry="15" class="step-card"/>
+  <circle cx="475" cy="75" r="25" class="icon-bg"/>
+  <path class="icon" d="M475 60 L475 90 M460 75 L490 75 M475 60 L465 70 M475 60 L485 70 M475 90 L465 80 M475 90 L485 80 M475 60 C475 50 485 50 485 60 L485 70 C485 80 475 80 475 70 L475 60 Z" transform="translate(475, 75) scale(0.5) translate(-475, -75)"/>
+  <text x="475" y="120" text-anchor="middle" class="step-text">Analyse multicritère</text>
+  <text x="475" y="145" text-anchor="middle" class="step-description">(180 points)</text>
+
+  {/* Arrow 2 */}
+  <line x1="600" y1="100" x2="650" y2="100" class="arrow"/>
+
+  {/* Step 3: Localisation des zones sensibles */}
+  <rect x="650" y="30" width="250" height="140" rx="15" ry="15" class="step-card"/>
+  <circle cx="775" cy="75" r="25" class="icon-bg"/>
+  <path class="icon" d="M775 60 L775 90 M760 75 L790 75 M775 60 L765 70 M775 60 L785 70 M775 90 L765 80 M775 90 L785 80 M775 60 C775 50 785 50 785 60 L785 70 C785 80 775 80 775 70 L775 60 Z" transform="translate(775, 75) scale(0.5) translate(-775, -75)"/>
+  <text x="775" y="120" text-anchor="middle" class="step-text">Localisation des</text>
+  <text x="775" y="145" text-anchor="middle" class="step-description">zones sensibles</text>
+
+  {/* Arrow 3 */}
+  <line x1="900" y1="100" x2="950" y2="100" class="arrow"/>
+
+  {/* Step 4: Rapport certifié VerifDoc */}
+  <rect x="950" y="30" width="250" height="140" rx="15" ry="15" class="step-card"/>
+  <circle cx="1075" cy="75" r="25" class="icon-bg"/>
+  <path class="icon" d="M1075 60 L1075 90 M1060 75 L1090 75 M1075 60 L1065 70 M1075 60 L1085 70 M1075 90 L1065 80 M1075 90 L1085 80 M1075 60 C1075 50 1085 50 1085 60 L1085 70 C1085 80 1075 80 1075 70 L1075 60 Z" transform="translate(1075, 75) scale(0.5) translate(-1075, -75)"/>
+  <text x="1075" y="120" text-anchor="middle" class="step-text">Rapport certifié</text>
+  <text x="1075" y="145" text-anchor="middle" class="step-description">VerifDoc</text>
+</svg>

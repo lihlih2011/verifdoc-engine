@@ -38,6 +38,12 @@ const HowItWorks = () => {
           Le processus d’analyse repose sur une chaîne méthodologique structurée, permettant une évaluation fiable, reproductible et conforme aux standards internationaux.
         </p>
 
+        <img
+          src="/images/verifdoc-process.svg"
+          alt="Schéma du processus VerifDoc"
+          className="mx-auto my-12 w-full max-w-4xl"
+        />
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {steps.map((step, index) => (
             <Card key={index} className="flex flex-col items-center text-center p-6 shadow-sm hover:shadow-md transition-shadow duration-300">

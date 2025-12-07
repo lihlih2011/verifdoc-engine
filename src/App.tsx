@@ -5,13 +5,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import AnalyzeDocument from "./pages/AnalyzeDocument";
-import Pricing from "./pages/Pricing";
+import Pricing from "./pages/pricing"; // Fixed casing here
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/auth/login";
 import SignupPage from "./pages/auth/signup";
 import ResetPasswordPage from "./pages/auth/reset-password";
-import HistoryPage from "./pages/dashboard/history"; // New import
-import AnalysisDetailPage from "./pages/dashboard/analysis/[id]"; // New import
+import HistoryPage from "./pages/dashboard/history";
+import AnalysisDetailPage from "./pages/dashboard/analysis/[id]";
 import { ThemeProvider } from "@/components/theme-provider";
 import { MainLayout } from "@/layouts/MainLayout";
 import { AuthProvider } from "./context/AuthContext";
