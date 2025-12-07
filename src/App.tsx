@@ -7,13 +7,15 @@ import Index from "./pages/Index";
 import AnalyzeDocument from "./pages/AnalyzeDocument";
 import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
-import LoginPage from "./pages/auth/login"; // New import
-import SignupPage from "./pages/auth/signup"; // New import
-import ResetPasswordPage from "./pages/auth/reset-password"; // New import
+import LoginPage from "./pages/auth/login";
+import SignupPage from "./pages/auth/signup";
+import ResetPasswordPage from "./pages/auth/reset-password";
+import HistoryPage from "./pages/dashboard/history"; // New import
+import AnalysisDetailPage from "./pages/dashboard/analysis/[id]"; // New import
 import { ThemeProvider } from "@/components/theme-provider";
 import { MainLayout } from "@/layouts/MainLayout";
-import { AuthProvider } from "./context/AuthContext"; // New import
-import { ProtectedRoute } from "./components/ProtectedRoute"; // New import
+import { AuthProvider } from "./context/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -24,7 +26,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <AuthProvider> {/* Wrap with AuthProvider */}
+          <AuthProvider>
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<MainLayout><Index /></MainLayout>} />
@@ -42,7 +44,22 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
-              {/* Add other protected routes here, e.g., /dashboard */}
+              <Route
+                path="/dashboard/history"
+                element={
+                  <ProtectedRoute>
+                    <HistoryPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/analysis/:id"
+                element={
+                  <ProtectedRoute>
+                    <AnalysisDetailPage />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Catch-all route */}
               <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
