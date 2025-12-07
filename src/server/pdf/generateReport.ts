@@ -1,4 +1,6 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import fs from 'fs/promises'; // For reading the SVG file
+import sharp from 'sharp'; // For converting SVG to PNG
 
 interface GenerateReportData {
   filename: string;
@@ -54,6 +56,16 @@ export async function generateVerifDocReport(data: GenerateReportData) {
       drawText(title, margin, y, 16, rgb(0.1, 0.2, 0.4), fontBold);
       y -= lineHeight * 2;
     };
+
+    // Load the SVG seal
+    const sealSvgPath = "public/verifdoc-seal.svg"; // Path relative to project root
+    const sealSvg = await fs.readFile(sealSvgPath, "utf8");
+
+    // Convert SVG to PNG using sharp
+    const sealPngBuffer = await sharp(Buffer.from(sealSvg)).png().toBuffer();
+    const sealImage = await pdfDoc.embedPng(sealPngBuffer);
+    const sealWidth = 80;
+    const sealHeight = sealImage.height * (sealWidth / sealImage.width); // Maintain aspect ratio
 
     // 1. Header
     drawText('VerifDoc™', margin, y, 24, rgb(0.23, 0.51, 0.96), fontBold); // Primary blue
@@ -236,32 +248,52 @@ export async function generateVerifDocReport(data: GenerateReportData) {
     }
     y -= sectionSpacing;
 
-    // 8. Footer
-    if (y < margin + 50) { // Ensure footer has space
-      page = pdfDoc.addPage();
-      y = height - margin;
-    }
-    y = margin + 40; // Position footer near bottom
-    page.drawLine({
-      start: { x: margin, y: y + 10 },
-      end: { x: width - margin, y: y + 10 },
-      thickness: 1,
-      color: rgb(0.7, 0.7, 0.7),
-    });
-    drawText('Rapport généré automatiquement par VerifDoc™', margin, y, 10, rgb(0.5, 0.5, 0.5));
-    y -= lineHeight * 1.5;
-    drawText('Cachet d’intégrité numérique', margin, y, 10, rgb(0.5, 0.5, 0.5));
-    page.drawRectangle({
-      x: width - margin - 100,
-      y: y - 5,
-      width: 100,
-      height: 30,
-      borderColor: rgb(0.23, 0.51, 0.96),
-      borderWidth: 1,
-      color: rgb(0.95, 0.97, 0.99),
-    });
-    drawText('Sceau VerifDoc', width - margin - 90, y + 10, 8, rgb(0.23, 0.51, 0.96), fontBold);
+    // Apply footer to all pages
+    const pages = pdfDoc.getPages();
+    for (const currentPage of pages) {
+      const footerY = margin + 40; // Fixed position from bottom
+      const sealX = width - margin - sealWidth;
+      const sealY = footerY - 5; // Position seal slightly above the rule
 
+      // 1. Light horizontal rule above the footer
+      currentPage.drawLine({
+        start: { x: margin, y: footerY + 10 },
+        end: { x: width - margin, y: footerY + 10 },
+        thickness: 1,
+        color: rgb(0.7, 0.7, 0.7),
+      });
+
+      // 2. Embed the PNG seal
+      currentPage.drawImage(sealImage, {
+        x: sealX,
+        y: sealY,
+        width: sealWidth,
+        height: sealHeight,
+      });
+
+      // 3. Text under the seal
+      // "Cachet d’intégrité VerifDoc™"
+      const text1 = 'Cachet d’intégrité VerifDoc™';
+      const text1Width = fontBold.widthOfTextAtSize(text1, 8);
+      currentPage.drawText(text1, {
+        x: sealX + (sealWidth - text1Width) / 2, // Centered under seal
+        y: sealY - lineHeight * 1.5,
+        font: fontBold,
+        size: 8,
+        color: rgb(0.23, 0.51, 0.96),
+      });
+
+      // "Rapport généré automatiquement – Non modifiable"
+      const text2 = 'Rapport généré automatiquement – Non modifiable';
+      const text2Width = font.widthOfTextAtSize(text2, 7);
+      currentPage.drawText(text2, {
+        x: sealX + (sealWidth - text2Width) / 2, // Centered under seal
+        y: sealY - lineHeight * 2.5,
+        font: font,
+        size: 7,
+        color: rgb(0.5, 0.5, 0.5),
+      });
+    }
 
     const pdfBytes = await pdfDoc.save();
     return { success: true, pdfBase64: Buffer.from(pdfBytes).toString('base64') };
