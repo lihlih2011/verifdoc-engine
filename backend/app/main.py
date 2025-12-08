@@ -6,6 +6,7 @@ from backend.api.report_api import router as report_router
 from backend.api.verify_api import router as verify_router
 from backend.api.signature_api import router as signature_router
 from backend.api.embedded_api import router as embedded_router
+from backend.api.ml_router import router as ml_router # NEW IMPORT
 from backend.app.config import settings
 from backend.app.database import Base, engine
 import os
@@ -32,6 +33,7 @@ app.include_router(report_router)
 app.include_router(verify_router)
 app.include_router(signature_router)
 app.include_router(embedded_router)
+app.include_router(ml_router) # NEW: Include the ML router
 
 @app.get("/")
 async def read_root():
