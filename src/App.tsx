@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import NewAnalyse from "./pages/dashboard/NewAnalyse"; // Updated import path
+import NewAnalyse from "./pages/dashboard/NewAnalyse";
 import Pricing from "./pages/pricing";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/auth/login";
@@ -14,6 +14,7 @@ import HistoryPage from "./pages/dashboard/history";
 import AnalysisDetailPage from "./pages/dashboard/analysis/[id]";
 import DashboardHome from "./pages/dashboard/DashboardHome";
 import SecurityPage from "./pages/SecurityPage";
+import ReportViewer from "./pages/report/ReportViewer"; // NEW IMPORT
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { MainLayout } from "@/layouts/MainLayout";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="/auth/login" element={<LoginPage />} />
               <Route path="/auth/signup" element={<SignupPage />} />
               <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/report/:id" element={<MainLayout><ReportViewer /></MainLayout>} /> {/* NEW ROUTE */}
 
               {/* Protected Routes */}
               <Route
@@ -52,7 +54,7 @@ const App = () => (
                 path="/analyze"
                 element={
                   <ProtectedRoute>
-                    <DashboardLayout><NewAnalyse /></DashboardLayout> {/* Updated component */}
+                    <DashboardLayout><NewAnalyse /></DashboardLayout>
                   </ProtectedRoute>
                 }
               />
