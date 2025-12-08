@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  verifdoc-backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000" # Expose backend port
+    env_file:
+      - .env # Load environment variables from .env file
+    restart: always
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # Command to run the FastAPI application using Uvicorn
+    command: uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  verifdoc-frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "80:80" # Expose frontend port
+    env_file:
+      - .env # Load environment variables from .env file (for build-time if needed, or future runtime)
+    restart: always
+    depends_on:
+      verifdoc-backend:
+        condition: service_healthy # Frontend depends on backend being healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017" # Expose MongoDB default port
+    env_file:
+      - .env # Load MongoDB credentials from .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - mongo_data:/data/db # Persistent volume for MongoDB data
+    restart: always
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --port 27017 --authenticationDatabase admin -u $$MONGO_INITDB_ROOT_USERNAME -p $$MONGO_INITDB_ROOT_PASSWORD --quiet || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379" # Expose Redis default port
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  mongo_data: # Define the named volume for MongoDB
