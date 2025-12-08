@@ -9,5 +9,11 @@
     "path": "ml_models/efficientnet_forensic.h5",
     "input_size": [224, 224],
     "output_type": "classification"
+  },
+  "unet_forgery": {
+   "type": "torch",
+   "path": "ml_models/unet_forgery.pth",
+   "input_size": [256, 256],
+   "output_type": "segmentation"
   }
 }
