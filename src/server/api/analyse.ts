@@ -1,4 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
+import { runELAAnalysis } from '../ia/ela';
+import { runNoisePrint } from '../ia/noiseprint';
+import { runCopyMove } from '../ia/copymove';
+import { runOCR } from '../ia/ocr';
+import { runFusionEngine } from '../ia/fusion';
+import { analyseForgery } from './ml'; // Import the new ML analysis function
 
 // Placeholder for a 1x1 transparent PNG base64 string
 const DUMMY_HEATMAP_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
@@ -14,84 +20,8 @@ interface AnalysisResult {
   score?: number;   // A score from 0 to 100
 }
 
-async function runELAAnalysis(fileBuffer: Buffer, filename: string): Promise<AnalysisResult> {
-  console.log(`[ELA] Analyzing ${filename}...`);
-  // Simulate processing time
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return {
-    success: true,
-    data: { message: "ELA analysis complete (placeholder)" },
-    heatmap: DUMMY_HEATMAP_BASE64,
-    score: parseFloat((Math.random() * 100).toFixed(2)),
-  };
-}
-
-async function runNoisePrint(fileBuffer: Buffer, filename: string): Promise<AnalysisResult> {
-  console.log(`[NoisePrint] Analyzing ${filename}...`);
-  await new Promise(resolve => setTimeout(resolve, 600));
-  return {
-    success: true,
-    data: { message: "NoisePrint analysis complete (placeholder)" },
-    heatmap: DUMMY_HEATMAP_BASE64,
-    score: parseFloat((Math.random() * 100).toFixed(2)),
-  };
-}
-
-async function runCopyMove(fileBuffer: Buffer, filename: string): Promise<AnalysisResult> {
-  console.log(`[CopyMove] Analyzing ${filename}...`);
-  await new Promise(resolve => setTimeout(resolve, 700));
-  return {
-    success: true,
-    data: { message: "Copy-Move analysis complete (placeholder)" },
-    heatmap: DUMMY_HEATMAP_BASE64,
-    score: parseFloat((Math.random() * 100).toFixed(2)),
-  };
-}
-
-async function runOCR(fileBuffer: Buffer, filename: string): Promise<AnalysisResult> {
-  console.log(`[OCR] Analyzing ${filename}...`);
-  await new Promise(resolve => setTimeout(resolve, 400));
-  return {
-    success: true,
-    data: { text: "Extracted text (placeholder)", layout: [] },
-    score: parseFloat((Math.random() * 100).toFixed(2)), // OCR confidence score
-  };
-}
-
-async function runFusionEngine(moduleResults: { [key: string]: AnalysisResult }): Promise<AnalysisResult> {
-  console.log("[Fusion] Fusing results...");
-  await new Promise(resolve => setTimeout(resolve, 300));
-
-  const scores: number[] = [];
-  for (const key in moduleResults) {
-    if (moduleResults[key].success && typeof moduleResults[key].score === 'number') {
-      scores.push(moduleResults[key].score!);
-    }
-  }
-
-  const globalScore = scores.length > 0
-    ? parseFloat((scores.reduce((sum, current) => sum + current, 0) / scores.length).toFixed(2))
-    : 0;
-
-  const indicators = [
-    globalScore > 70 ? "High risk of forgery" : "Low risk of forgery",
-    moduleResults.ela?.score && moduleResults.ela.score > 50 ? "Compression anomalies detected" : "Normal compression",
-    moduleResults.noiseprint?.score && moduleResults.noiseprint.score > 50 ? "AI noise signature found" : "No AI noise signature",
-  ];
-
-  const summary = globalScore > 60
-    ? "The document shows multiple signs of potential manipulation across various forensic modules."
-    : "The document appears largely authentic with no significant signs of forgery detected.";
-
-  return {
-    success: true,
-    data: {
-      summary,
-      indicators,
-    },
-    score: globalScore,
-  };
-}
+// The existing runELAAnalysis, runNoisePrint, runCopyMove, runOCR are already defined in src/server/ia/
+// I will assume these are the functions to be called.
 
 // --- Main API Handler ---
 
@@ -131,16 +61,20 @@ export async function analyseDocument(request: Request) {
     const noiseprintResult = await runNoisePrint(fileBuffer, file.name);
     const copymoveResult = await runCopyMove(fileBuffer, file.name);
     const ocrResult = await runOCR(fileBuffer, file.name);
+    
+    // NEW: Run ML Forgery Analysis
+    const mlForgeryAnalysisResult = await analyseForgery(fileBuffer);
 
     const moduleResults = {
       ela: elaResult,
       noiseprint: noiseprintResult,
       copymove: copymoveResult,
       ocr: ocrResult,
+      mlAnalysis: mlForgeryAnalysisResult, // NEW: Include ML analysis results
     };
 
-    // Run fusion engine
-    const fusionResult = await runFusionEngine(moduleResults);
+    // Run fusion engine (you might need to update runFusionEngine to accept mlAnalysis)
+    const fusionResult = runFusionEngine(moduleResults); // Assuming fusion engine is updated to handle new module
 
     // Build unified result object
     const unifiedResult = {
@@ -153,14 +87,16 @@ export async function analyseDocument(request: Request) {
       noiseprint: noiseprintResult,
       copymove: copymoveResult,
       ocr: ocrResult,
-      fusion: fusionResult.data,
-      globalScore: fusionResult.score,
-      indicators: fusionResult.data.indicators,
-      summary: fusionResult.data.summary,
+      mlAnalysis: mlForgeryAnalysisResult, // NEW: Add ML analysis to the final result
+      fusion: fusionResult.data, // Assuming fusionResult has a 'data' field
+      globalScore: fusionResult.score, // Assuming fusionResult has a 'score' field
+      indicators: fusionResult.data.indicators, // Assuming fusionResult.data has 'indicators'
+      summary: fusionResult.data.summary, // Assuming fusionResult.data has 'summary'
       heatmaps: {
         ela: elaResult.heatmap,
         noiseprint: noiseprintResult.heatmap,
         copymove: copymoveResult.heatmap,
+        mlForgery: mlForgeryAnalysisResult.heatmap, // NEW: Add ML forgery heatmap
       }
     };
 
