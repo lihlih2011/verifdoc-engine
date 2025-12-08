@@ -14,4 +14,5 @@ class AnalysisRecord(Base):
     heatmaps = Column(JSON, nullable=True) # New column for heatmap file paths
     report_file_path = Column(String, nullable=True) # New column for the path to the generated PDF report
     integrity_hash = Column(String, nullable=True) # New column for the SHA-256 hash of the report
+    signature_info = Column(JSON, nullable=True) # New column for digital signature analysis results
     created_at = Column(DateTime, default=datetime.utcnow)

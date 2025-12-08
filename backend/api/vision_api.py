@@ -11,6 +11,7 @@ from backend.engine.diffusion_forensics import DiffusionForensics
 from backend.engine.gan_fingerprint import GANFingerprintDetector
 from backend.engine.ela_engine import ELAEngine
 from backend.engine.copymove_engine import CopyMoveEngine
+from backend.engine.signature_engine import SignatureEngine # New import
 from backend.engine.fusion import FusionEngine
 from backend.engine.heatmap_generator import HeatmapGenerator # Import HeatmapGenerator
 from backend.app.database import get_db # Import get_db
@@ -25,6 +26,7 @@ diffusion_engine = DiffusionForensics(device="cpu")
 noiseprint_engine = GANFingerprintDetector(device="cpu")
 ela_engine = ELAEngine()
 copymove_engine = CopyMoveEngine()
+signature_engine = SignatureEngine() # Initialize SignatureEngine
 fusion_engine = FusionEngine()
 heatmap_gen = HeatmapGenerator() # Initialize HeatmapGenerator
 
@@ -35,7 +37,8 @@ async def analyze_document(file: UploadFile = File(...), db: Session = Depends(g
         content = await file.read()
         stream = io.BytesIO(content)
 
-        # Convert input to image
+        # Convert input to image for image-based engines
+        # Note: Some engines might need the raw PDF bytes if it's a PDF
         image = Image.open(stream).convert("RGB")
 
         # Run modules
@@ -45,6 +48,12 @@ async def analyze_document(file: UploadFile = File(...), db: Session = Depends(g
         noiseprint_res = noiseprint_engine.analyze(image)
         ela_res        = ela_engine.analyze(image)
         copymove_res   = copymove_engine.detect_copymove(image)
+        
+        # Run signature analysis if it's a PDF
+        signature_res = {"hasSignature": False}
+        if file.filename.lower().endswith(".pdf"):
+            # Reset stream for signature engine if needed, or pass raw content
+            signature_res = signature_engine.analyze_pdf_signature(content)
 
         # Fusion
         final_result = fusion_engine.fuse({
@@ -53,7 +62,8 @@ async def analyze_document(file: UploadFile = File(...), db: Session = Depends(g
             "diffusion": diffusion_res,
             "noiseprint": noiseprint_res,
             "ela": ela_res,
-            "copymove": copymove_res
+            "copymove": copymove_res,
+            "signature": signature_res # Include signature results in fusion
         })
 
         # Generate heatmaps
@@ -73,6 +83,7 @@ async def analyze_document(file: UploadFile = File(...), db: Session = Depends(g
             risk_level=final_result["risk_level"],
             full_result=final_result,
             heatmaps=heatmaps, # Save heatmap paths
+            signature_info=signature_res, # Save signature info
             created_at=datetime.utcnow()
         )
         db.add(record)
