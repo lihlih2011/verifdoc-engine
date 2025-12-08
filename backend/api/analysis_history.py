@@ -46,5 +46,6 @@ async def get_analysis_detail(record_id: int, db: Session = Depends(get_db)):
         "full_result": record.full_result,
         "heatmaps": record.heatmaps, # Include heatmap paths
         "integrity_hash": record.integrity_hash, # NEW: Include integrity hash
-        "report_file_path": record.report_file_path # NEW: Include report file path
+        "report_file_path": record.report_file_path, # NEW: Include report file path
+        "signature_info": record.signature_info # NEW: Include signature info
     }
