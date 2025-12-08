@@ -15,5 +15,11 @@
    "path": "ml_models/unet_forgery.pth",
    "input_size": [256, 256],
    "output_type": "segmentation"
+  },
+  "vit_forensic": {
+    "type": "torch",
+    "path": "ml_models/vit_forensic.bin",
+    "input_size": [224, 224],
+    "output_type": "classification"
   }
 }
