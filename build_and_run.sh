@@ -1,41 +1,35 @@
 #!/bin/bash
-set -e
 
-echo "Building Docker images for backend and frontend..."
-docker compose build
+echo "🚀 Building VerifDoc Docker images..."
 
-echo "Starting Docker Compose services in detached mode..."
-docker compose up -d
+docker-compose build
 
-echo "Waiting for backend service to become healthy..."
-BACKEND_HEALTH_URL="http://localhost:8000/health"
-MAX_RETRIES=30
-RETRY_INTERVAL=5
-ATTEMPT=0
+echo "🔄 Starting services..."
+docker-compose up -d
 
-while [ $ATTEMPT -lt $MAX_RETRIES ]; do
-  HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $BACKEND_HEALTH_URL || echo "000")
-  if [ "$HTTP_CODE" -eq 200 ]; then
-    echo "Backend is healthy! (Status: $HTTP_CODE)"
-    break
-  else
-    echo "Backend not yet healthy (status: $HTTP_CODE). Retrying in $RETRY_INTERVAL seconds... (Attempt $((ATTEMPT+1))/$MAX_RETRIES)"
-    sleep $RETRY_INTERVAL
-    ATTEMPT=$((ATTEMPT+1))
-  fi
+echo "⏳ Waiting for backend health check..."
+
+# boucle jusqu'à ce que /health renvoie 200
+for i in {1..30}; do
+    STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/health)
+    if [ "$STATUS" -eq 200 ]; then
+        echo "✅ Backend is healthy!"
+        break
+    fi
+    echo "… retry ($i/30)"
+    sleep 2
 done
 
-if [ $ATTEMPT -eq $MAX_RETRIES ]; then
-  echo "Error: Backend did not become healthy within the allotted time."
-  echo "Please check the Docker Compose logs for 'verifdoc-backend' service."
-  exit 1
+if [ "$STATUS" -ne 200 ]; then
+    echo "❌ Backend did not become healthy. Check logs."
+    exit 1
 fi
 
 echo ""
-echo "========================================"
-echo " VerifDoc services are up and running! "
-echo "========================================"
-echo "Frontend URL: http://localhost:80"
-echo "Backend API URL: http://localhost:8000"
-echo "========================================"
+echo "==========================================="
+echo "     VerifDoc Platform Successfully Started"
+echo "==========================================="
+echo "Frontend: http://localhost"
+echo "Backend API: http://localhost:8000"
+echo "Health check: http://localhost:8000/health"
 echo ""
