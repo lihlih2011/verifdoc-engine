@@ -1,30 +1,35 @@
 import os
 import json
 import logging
-import time # Import time for performance counter
+import time
 from typing import Any, Dict, Optional, Tuple
 from PIL import Image
 import numpy as np
-from fastapi import HTTPException, status # Import HTTPException
+from fastapi import HTTPException, status
+
+# Added imports for PyTorch and UNet
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torchvision import transforms
 
 # Import loaders
 from backend.ml.loaders.base_loader import BaseModelLoader
-from backend.ml.loaders.torch_loader import TorchModelLoader
+from backend.ml.loaders.torch_loader import TorchModelLoader, UNetModel # Import UNetModel from torch_loader
 from backend.ml.loaders.keras_loader import KerasModelLoader
 
 # Import processors
 from backend.ml.processors.preprocess import preprocess_image
 from backend.ml.processors.postprocess import postprocess_output
 
-# NEW: Keras specific imports
+# Keras specific imports
 try:
     import tensorflow as tf
     from tensorflow.keras.applications.efficientnet import preprocess_input as efficientnet_preprocess_input
-    # Note: keras_load_model is now imported within KerasModelLoader
 except ImportError:
     tf = None
     efficientnet_preprocess_input = None
-    logger.warning("TensorFlow/Keras not installed. Keras-specific preprocessing will be skipped.")
+    logging.warning("TensorFlow/Keras not installed. Keras-specific preprocessing will be skipped.")
 
 
 # Setup logging
@@ -43,7 +48,6 @@ class MLEngine:
         self.loaders: Dict[str, BaseModelLoader] = {
             "torch": TorchModelLoader(base_path=self.base_model_dir),
             "keras": KerasModelLoader(base_path=self.base_model_dir),
-            # Add other loaders here (e.g., "onnx": ONNXModelLoader(base_path=self.base_model_dir))
         }
         logger.info(f"MLEngine initialized with registry: {model_registry_path}")
 
@@ -110,32 +114,29 @@ class MLEngine:
         Returns:
             Any: The post-processed output from the model.
         """
-        model = self.load_model(model_name) # This call now handles its own HTTPException
+        model = self.load_model(model_name)
 
         config = self.model_configs.get(model_name)
         if not config:
-            # This case should ideally be caught by load_model, but as a safeguard
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Configuration for model '{model_name}' not found."
             )
 
+        original_image_size = image.size # Store original size for segmentation mask resizing
         target_size = config.get("input_size", (224, 224))
         model_type = config.get("type")
+        output_type = config.get("output_type", "classification") # Get output_type from config
 
         start_preprocess_time = time.perf_counter()
         try:
-            # Step 1: Resize and convert to NumPy array (pixel values 0-255)
             preprocessed_input_np = preprocess_image(image, target_size)
-
-            # Step 2: Apply model-specific normalization
             input_for_model = None
+
             if model_name == "efficientnet_forensic" and tf is not None and efficientnet_preprocess_input is not None:
                 logger.debug(f"Applying EfficientNet specific preprocessing for '{model_name}'.")
-                # EfficientNet preprocess_input expects values in [0, 255]
                 input_for_model = efficientnet_preprocess_input(preprocessed_input_np)
             elif model_type == "keras":
-                # Generic ImageNet-like normalization for other Keras models
                 default_normalize_params = {
                     'mean': [0.485, 0.456, 0.406],
                     'std': [0.229, 0.224, 0.225],
@@ -146,7 +147,6 @@ class MLEngine:
                 scale = default_normalize_params['scale']
                 input_for_model = (preprocessed_input_np / scale - mean) / std
             elif model_type == "torch":
-                # Apply standard ImageNet normalization for PyTorch models
                 default_normalize_params = {
                     'mean': [0.485, 0.456, 0.406],
                     'std': [0.229, 0.224, 0.225],
@@ -157,16 +157,11 @@ class MLEngine:
                 scale = default_normalize_params['scale']
                 normalized_np = (preprocessed_input_np / scale - mean) / std
 
-                # PyTorch expects (Batch, Channels, Height, Width)
-                if normalized_np.ndim == 3 and normalized_np.shape[2] == 3: # (H, W, C)
-                    normalized_np = np.transpose(normalized_np, (2, 0, 1)) # (C, H, W)
-                # Add batch dimension
+                if normalized_np.ndim == 3 and normalized_np.shape[2] == 3:
+                    normalized_np = np.transpose(normalized_np, (2, 0, 1))
                 input_for_model = np.expand_dims(normalized_np, axis=0)
-                # Convert to torch tensor
-                import torch
                 input_for_model = torch.from_numpy(input_for_model).to(model.device if hasattr(model, 'device') else 'cpu')
             else:
-                # Fallback for unknown types, just add batch dim
                 input_for_model = np.expand_dims(preprocessed_input_np, axis=0)
 
             end_preprocess_time = time.perf_counter()
@@ -178,23 +173,21 @@ class MLEngine:
                 detail=f"Preprocessing failed for model '{model_name}': {e}"
             )
 
-        # Add batch dimension for Keras models if not already done by specific preprocess_input
-        if model_type == "keras" and input_for_model.ndim == 3: # (H, W, C) -> (1, H, W, C)
+        if model_type == "keras" and input_for_model.ndim == 3:
             input_for_model = np.expand_dims(input_for_model, axis=0)
 
         start_inference_time = time.perf_counter()
         try:
             raw_output = None
             if model_type == "torch":
-                import torch
                 with torch.no_grad():
                     model.eval()
-                    raw_output = model(input_for_model).cpu().numpy()
+                    raw_output = model(input_for_model) # Keep as tensor for segmentation post-processing
             elif model_type == "keras":
                 raw_output = model.predict(input_for_model)
             else:
                 logger.warning(f"Inference for model type '{model_type}' not explicitly handled. Returning dummy output.")
-                raw_output = np.random.rand(1, 2) # Dummy output
+                raw_output = np.random.rand(1, 2)
             end_inference_time = time.perf_counter()
             logger.info(f"Inference for model '{model_name}' completed in {end_inference_time - start_inference_time:.4f} seconds.")
         except Exception as e:
@@ -204,9 +197,30 @@ class MLEngine:
                 detail=f"Inference failed for model '{model_name}': {e}"
             )
 
-        output_type = config.get("output_type", "classification")
         logger.debug(f"Post-processing output for model '{model_name}' with output_type={output_type}")
-        processed_output = postprocess_output(raw_output, output_type, postprocess_params)
+        
+        # NEW: Segmentation specific post-processing
+        if output_type == "segmentation" and model_type == "torch":
+            # raw_output is a torch.Tensor here
+            sigmoid_output = torch.sigmoid(raw_output)
+            # Threshold at 0.5 to get binary mask
+            binary_mask = (sigmoid_output > 0.5).float()
+            
+            # Resize mask to original image size
+            # Interpolate expects (N, C, H, W)
+            resized_mask = F.interpolate(
+                binary_mask,
+                size=(original_image_size[1], original_image_size[0]), # (H, W)
+                mode='bilinear',
+                align_corners=False
+            )
+            # Convert to NumPy array and remove batch/channel dimensions if they are 1
+            processed_output = resized_mask.squeeze().cpu().numpy()
+        else:
+            # For other output types, convert raw_output to numpy if it's a tensor
+            if isinstance(raw_output, torch.Tensor):
+                raw_output = raw_output.cpu().numpy()
+            processed_output = postprocess_output(raw_output, output_type, postprocess_params)
 
         logger.info(f"Full inference pipeline for model '{model_name}' completed.")
         return processed_output
@@ -221,6 +235,7 @@ if __name__ == "__main__":
     with open("backend/ml_models/vit.pth", "w") as f: f.write("dummy torch model")
     with open("backend/ml_models/siamese.pth", "w") as f: f.write("dummy torch model")
     with open("backend/ml_models/gan_fp.pth", "w") as f: f.write("dummy torch model")
+    with open("backend/ml_models/unet_forgery.pth", "w") as f: f.write("dummy unet forgery model") # Added for testing
 
     ml_engine = MLEngine()
 
@@ -240,9 +255,9 @@ if __name__ == "__main__":
         vit_output = ml_engine.run_inference("vit", dummy_image)
         print(f"ViT Output: {vit_output}")
 
-        # Test PyTorch segmentation model inference
-        unet_output = ml_engine.run_inference("unet", dummy_image, postprocess_params={"threshold": 0.7})
-        print(f"UNet Output (mask shape): {unet_output.shape}, unique values: {np.unique(unet_output)}")
+        # Test PyTorch segmentation model inference (UNet)
+        unet_forgery_output = ml_engine.run_inference("unet_forgery", dummy_image)
+        print(f"UNet Forgery Output (mask shape): {unet_forgery_output.shape}, unique values: {np.unique(unet_forgery_output)}")
 
         # Test non-existent model
         try:
@@ -261,4 +276,5 @@ if __name__ == "__main__":
         os.remove("backend/ml_models/vit.pth")
         os.remove("backend/ml_models/siamese.pth")
         os.remove("backend/ml_models/gan_fp.pth")
+        os.remove("backend/ml_models/unet_forgery.pth")
         os.rmdir("backend/ml_models")
