@@ -16,6 +16,17 @@ from backend.ml.loaders.keras_loader import KerasModelLoader
 from backend.ml.processors.preprocess import preprocess_image
 from backend.ml.processors.postprocess import postprocess_output
 
+# NEW: Keras specific imports
+try:
+    import tensorflow as tf
+    from tensorflow.keras.applications.efficientnet import preprocess_input as efficientnet_preprocess_input
+    # Note: keras_load_model is now imported within KerasModelLoader
+except ImportError:
+    tf = None
+    efficientnet_preprocess_input = None
+    logger.warning("TensorFlow/Keras not installed. Keras-specific preprocessing will be skipped.")
+
+
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -109,19 +120,55 @@ class MLEngine:
                 detail=f"Configuration for model '{model_name}' not found."
             )
 
-        # Determine preprocessing parameters
-        target_size = config.get("input_size", (224, 224)) # Default to 224x224
-        # Default normalization for ImageNet-trained models (common)
-        default_normalize_params = {
-            'mean': [0.485, 0.456, 0.406],
-            'std': [0.229, 0.224, 0.225],
-            'scale': 255.0
-        }
-        final_preprocess_params = {**default_normalize_params, **(preprocess_params or {})}
+        target_size = config.get("input_size", (224, 224))
+        model_type = config.get("type")
 
         start_preprocess_time = time.perf_counter()
         try:
-            preprocessed_input = preprocess_image(image, target_size, final_preprocess_params)
+            # Step 1: Resize and convert to NumPy array (pixel values 0-255)
+            preprocessed_input_np = preprocess_image(image, target_size)
+
+            # Step 2: Apply model-specific normalization
+            input_for_model = None
+            if model_name == "efficientnet_forensic" and tf is not None and efficientnet_preprocess_input is not None:
+                logger.debug(f"Applying EfficientNet specific preprocessing for '{model_name}'.")
+                # EfficientNet preprocess_input expects values in [0, 255]
+                input_for_model = efficientnet_preprocess_input(preprocessed_input_np)
+            elif model_type == "keras":
+                # Generic ImageNet-like normalization for other Keras models
+                default_normalize_params = {
+                    'mean': [0.485, 0.456, 0.406],
+                    'std': [0.229, 0.224, 0.225],
+                    'scale': 255.0
+                }
+                mean = np.array(default_normalize_params['mean'], dtype=np.float32)
+                std = np.array(default_normalize_params['std'], dtype=np.float32)
+                scale = default_normalize_params['scale']
+                input_for_model = (preprocessed_input_np / scale - mean) / std
+            elif model_type == "torch":
+                # Apply standard ImageNet normalization for PyTorch models
+                default_normalize_params = {
+                    'mean': [0.485, 0.456, 0.406],
+                    'std': [0.229, 0.224, 0.225],
+                    'scale': 255.0
+                }
+                mean = np.array(default_normalize_params['mean'], dtype=np.float32)
+                std = np.array(default_normalize_params['std'], dtype=np.float32)
+                scale = default_normalize_params['scale']
+                normalized_np = (preprocessed_input_np / scale - mean) / std
+
+                # PyTorch expects (Batch, Channels, Height, Width)
+                if normalized_np.ndim == 3 and normalized_np.shape[2] == 3: # (H, W, C)
+                    normalized_np = np.transpose(normalized_np, (2, 0, 1)) # (C, H, W)
+                # Add batch dimension
+                input_for_model = np.expand_dims(normalized_np, axis=0)
+                # Convert to torch tensor
+                import torch
+                input_for_model = torch.from_numpy(input_for_model).to(model.device if hasattr(model, 'device') else 'cpu')
+            else:
+                # Fallback for unknown types, just add batch dim
+                input_for_model = np.expand_dims(preprocessed_input_np, axis=0)
+
             end_preprocess_time = time.perf_counter()
             logger.debug(f"Preprocessing for model '{model_name}' completed in {end_preprocess_time - start_preprocess_time:.4f} seconds.")
         except Exception as e:
@@ -131,35 +178,20 @@ class MLEngine:
                 detail=f"Preprocessing failed for model '{model_name}': {e}"
             )
 
-        # Adjust input shape for PyTorch (NCHW) vs Keras (NHWC) if necessary
-        model_type = config.get("type")
-        if model_type == "torch":
-            # PyTorch expects (Batch, Channels, Height, Width)
-            # If preprocessed_input is (H, W, C), convert to (C, H, W) and add batch dim
-            if preprocessed_input.ndim == 3 and preprocessed_input.shape[2] == 3: # (H, W, C)
-                preprocessed_input = np.transpose(preprocessed_input, (2, 0, 1)) # (C, H, W)
-            preprocessed_input = np.expand_dims(preprocessed_input, axis=0) # Add batch dimension (1, C, H, W)
-            # Convert to torch tensor
-            import torch
-            input_tensor = torch.from_numpy(preprocessed_input).to(model.device if hasattr(model, 'device') else 'cpu')
-        elif model_type == "keras":
-            # Keras expects (Batch, Height, Width, Channels)
-            preprocessed_input = np.expand_dims(preprocessed_input, axis=0) # Add batch dimension (1, H, W, C)
-            input_tensor = preprocessed_input # Keras predict can often take numpy directly
-        else:
-            input_tensor = preprocessed_input # Fallback
+        # Add batch dimension for Keras models if not already done by specific preprocess_input
+        if model_type == "keras" and input_for_model.ndim == 3: # (H, W, C) -> (1, H, W, C)
+            input_for_model = np.expand_dims(input_for_model, axis=0)
 
         start_inference_time = time.perf_counter()
         try:
-            # Run inference
             raw_output = None
             if model_type == "torch":
                 import torch
                 with torch.no_grad():
                     model.eval()
-                    raw_output = model(input_tensor).cpu().numpy()
+                    raw_output = model(input_for_model).cpu().numpy()
             elif model_type == "keras":
-                raw_output = model.predict(input_tensor)
+                raw_output = model.predict(input_for_model)
             else:
                 logger.warning(f"Inference for model type '{model_type}' not explicitly handled. Returning dummy output.")
                 raw_output = np.random.rand(1, 2) # Dummy output
@@ -172,7 +204,6 @@ class MLEngine:
                 detail=f"Inference failed for model '{model_name}': {e}"
             )
 
-        # Post-process output
         output_type = config.get("output_type", "classification")
         logger.debug(f"Post-processing output for model '{model_name}' with output_type={output_type}")
         processed_output = postprocess_output(raw_output, output_type, postprocess_params)
@@ -185,6 +216,7 @@ if __name__ == "__main__":
     # Create dummy model files for testing
     os.makedirs("backend/ml_models", exist_ok=True)
     with open("backend/ml_models/efficientnet.h5", "w") as f: f.write("dummy keras model")
+    with open("backend/ml_models/efficientnet_forensic.h5", "w") as f: f.write("dummy efficientnet forensic model") # Added for testing
     with open("backend/ml_models/unet.pth", "w") as f: f.write("dummy torch model")
     with open("backend/ml_models/vit.pth", "w") as f: f.write("dummy torch model")
     with open("backend/ml_models/siamese.pth", "w") as f: f.write("dummy torch model")
@@ -199,6 +231,10 @@ if __name__ == "__main__":
         # Test Keras model inference
         efficientnet_output = ml_engine.run_inference("efficientnet", dummy_image)
         print(f"EfficientNet Output: {efficientnet_output}")
+
+        # Test EfficientNet Forensic model inference
+        efficientnet_forensic_output = ml_engine.run_inference("efficientnet_forensic", dummy_image)
+        print(f"EfficientNet Forensic Output: {efficientnet_forensic_output}")
 
         # Test PyTorch classification model inference
         vit_output = ml_engine.run_inference("vit", dummy_image)
@@ -220,6 +256,7 @@ if __name__ == "__main__":
     finally:
         # Clean up dummy model files
         os.remove("backend/ml_models/efficientnet.h5")
+        os.remove("backend/ml_models/efficientnet_forensic.h5")
         os.remove("backend/ml_models/unet.pth")
         os.remove("backend/ml_models/vit.pth")
         os.remove("backend/ml_models/siamese.pth")
