@@ -3,5 +3,11 @@
   "unet": { "type": "torch", "path": "ml_models/unet.pth", "input_size": [256, 256], "output_type": "segmentation" },
   "vit": { "type": "torch", "path": "ml_models/vit.pth", "input_size": [224, 224], "output_type": "classification" },
   "siamese": { "type": "torch", "path": "ml_models/siamese.pth", "input_size": [128, 128], "output_type": "embedding" },
-  "gan_fingerprint": { "type": "torch", "path": "ml_models/gan_fp.pth", "input_size": [256, 256], "output_type": "classification" }
+  "gan_fingerprint": { "type": "torch", "path": "ml_models/gan_fp.pth", "input_size": [256, 256], "output_type": "classification" },
+  "efficientnet_forensic": {
+    "type": "keras",
+    "path": "ml_models/efficientnet_forensic.h5",
+    "input_size": [224, 224],
+    "output_type": "classification"
+  }
 }
