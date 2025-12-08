@@ -13,6 +13,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import transforms
 
+# NEW IMPORTS for ViT
+from transformers import ViTModel, ViTFeatureExtractor
+
 # Import loaders
 from backend.ml.loaders.base_loader import BaseModelLoader
 from backend.ml.loaders.torch_loader import TorchModelLoader, UNetModel # Import UNetModel from torch_loader
@@ -89,11 +92,11 @@ class MLEngine:
         start_time = time.perf_counter()
         try:
             logger.info(f"Loading model '{model_name}' (type: {model_type}, path: {model_path})...")
-            model = loader.load_model(model_path)
-            self.loaded_models[model_name] = model
+            loaded_components = loader.load_model(model_path) # Can be model or dict for ViT
+            self.loaded_models[model_name] = loaded_components
             end_time = time.perf_counter()
             logger.info(f"Model '{model_name}' loaded successfully in {end_time - start_time:.4f} seconds.")
-            return model
+            return loaded_components
         except Exception as e:
             logger.error(f"Failed to load model '{model_name}': {e}")
             raise HTTPException(
@@ -114,7 +117,7 @@ class MLEngine:
         Returns:
             Any: The post-processed output from the model.
         """
-        model = self.load_model(model_name)
+        model_components = self.load_model(model_name) # Can be model or dict for ViT
 
         config = self.model_configs.get(model_name)
         if not config:
@@ -127,12 +130,40 @@ class MLEngine:
         target_size = config.get("input_size", (224, 224))
         model_type = config.get("type")
         output_type = config.get("output_type", "classification") # Get output_type from config
+        device = ai_config.DEVICE
 
         start_preprocess_time = time.perf_counter()
         try:
-            preprocessed_input_np = preprocess_image(image, target_size)
             input_for_model = None
+            raw_output = None
 
+            if model_name == "vit_forensic":
+                vit_model = model_components["model"]
+                feature_extractor = model_components["feature_extractor"]
+                
+                # Preprocess image using ViTFeatureExtractor
+                inputs = feature_extractor(images=image, return_tensors="pt").to(device)
+                input_for_model = inputs # Store for logging/debugging if needed
+                
+                with torch.no_grad():
+                    vit_model.eval()
+                    outputs = vit_model(**inputs)
+                    # Get mean pooled embedding (last_hidden_state[:, 0] is the CLS token embedding)
+                    embedding = outputs.pooler_output # This is the pooled output for classification
+                    
+                    # Compute anomaly score based on the norm of the embedding
+                    # A higher norm might indicate a more "unusual" or "out-of-distribution" input
+                    anomaly_score = torch.norm(embedding).item()
+                    
+                    # Normalize the score to be between 0 and 1 (heuristic)
+                    # Max norm can vary, using a heuristic max of 10 for normalization
+                    normalized_score = min(1.0, anomaly_score / 10.0) 
+                    
+                    return {"score": normalized_score} # Return directly for ViT
+            
+            # --- Generic preprocessing for other models ---
+            preprocessed_input_np = preprocess_image(image, target_size)
+            
             if model_name == "efficientnet_forensic" and tf is not None and efficientnet_preprocess_input is not None:
                 logger.debug(f"Applying EfficientNet specific preprocessing for '{model_name}'.")
                 input_for_model = efficientnet_preprocess_input(preprocessed_input_np)
@@ -160,7 +191,7 @@ class MLEngine:
                 if normalized_np.ndim == 3 and normalized_np.shape[2] == 3:
                     normalized_np = np.transpose(normalized_np, (2, 0, 1))
                 input_for_model = np.expand_dims(normalized_np, axis=0)
-                input_for_model = torch.from_numpy(input_for_model).to(model.device if hasattr(model, 'device') else 'cpu')
+                input_for_model = torch.from_numpy(input_for_model).to(model_components.device if hasattr(model_components, 'device') else 'cpu')
             else:
                 input_for_model = np.expand_dims(preprocessed_input_np, axis=0)
 
@@ -178,13 +209,12 @@ class MLEngine:
 
         start_inference_time = time.perf_counter()
         try:
-            raw_output = None
             if model_type == "torch":
                 with torch.no_grad():
-                    model.eval()
-                    raw_output = model(input_for_model) # Keep as tensor for segmentation post-processing
+                    model_components.eval()
+                    raw_output = model_components(input_for_model) # Keep as tensor for segmentation post-processing
             elif model_type == "keras":
-                raw_output = model.predict(input_for_model)
+                raw_output = model_components.predict(input_for_model)
             else:
                 logger.warning(f"Inference for model type '{model_type}' not explicitly handled. Returning dummy output.")
                 raw_output = np.random.rand(1, 2)
@@ -236,6 +266,7 @@ if __name__ == "__main__":
     with open("backend/ml_models/siamese.pth", "w") as f: f.write("dummy torch model")
     with open("backend/ml_models/gan_fp.pth", "w") as f: f.write("dummy torch model")
     with open("backend/ml_models/unet_forgery.pth", "w") as f: f.write("dummy unet forgery model") # Added for testing
+    with open("backend/ml_models/vit_forensic.bin", "w") as f: f.write("dummy vit forensic model") # Added for testing
 
     ml_engine = MLEngine()
 
@@ -259,6 +290,10 @@ if __name__ == "__main__":
         unet_forgery_output = ml_engine.run_inference("unet_forgery", dummy_image)
         print(f"UNet Forgery Output (mask shape): {unet_forgery_output.shape}, unique values: {np.unique(unet_forgery_output)}")
 
+        # Test ViT Forensic model inference
+        vit_forensic_output = ml_engine.run_inference("vit_forensic", dummy_image)
+        print(f"ViT Forensic Output: {vit_forensic_output}")
+
         # Test non-existent model
         try:
             ml_engine.run_inference("non_existent_model", dummy_image)
@@ -277,4 +312,5 @@ if __name__ == "__main__":
         os.remove("backend/ml_models/siamese.pth")
         os.remove("backend/ml_models/gan_fp.pth")
         os.remove("backend/ml_models/unet_forgery.pth")
+        os.remove("backend/ml_models/vit_forensic.bin")
         os.rmdir("backend/ml_models")

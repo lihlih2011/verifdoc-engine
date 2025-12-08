@@ -6,10 +6,10 @@ from typing import Any
 from backend.ml.loaders.base_loader import BaseModelLoader
 from backend.app.config import ai_config # Assuming ai_config has DEVICE
 
+# NEW IMPORTS for ViT
+from transformers import ViTModel, ViTFeatureExtractor
+
 # --- Simplified UNet Model Definition (Placeholder) ---
-# This is a very basic UNet-like structure. A real UNet would be much more complex.
-# It's designed to be able to load a state_dict from a pre-trained model,
-# assuming the state_dict keys match this simplified architecture.
 class UNetModel(nn.Module):
     def __init__(self, in_channels=3, out_channels=1):
         super().__init__()
@@ -20,9 +20,8 @@ class UNetModel(nn.Module):
 
         # Decoder
         self.upconv1 = nn.ConvTranspose2d(128, 64, kernel_size=2, stride=2)
-        # The skip connection from enc1 would typically be concatenated here.
-        # For simplicity, we'll assume a direct upsampling and then a conv.
-        # A real UNet would have more layers and proper skip connections.
+        diffY = 0
+        diffX = 0
         self.dec1 = self._conv_block(128, 64) # This would be 64 (upconv) + 64 (skip)
         self.outconv = nn.Conv2d(64, out_channels, kernel_size=1)
 
@@ -60,48 +59,58 @@ class TorchModelLoader(BaseModelLoader):
         full_path = self._resolve_path(model_path)
         device = ai_config.DEVICE
 
-        if not os.path.exists(full_path):
+        if not os.path.exists(full_path) and "vit_forensic.bin" not in model_path:
             print(f"Torch model file not found: {full_path}. Returning placeholder.")
-            # Generic dummy model for other cases
             class DummyTorchModel(nn.Module):
                 def __init__(self):
                     super().__init__()
-                    self.linear = nn.Linear(10, 2) # Example: 10 input features, 2 output classes
+                    self.linear = nn.Linear(10, 2)
                 def forward(self, x):
-                    return torch.randn(x.shape[0], 2) # Batch size, 2 classes
+                    return torch.randn(x.shape[0], 2)
             dummy_model = DummyTorchModel().to(device)
-            dummy_model.task = "classification" # Default task for dummy
+            dummy_model.task = "classification"
             return dummy_model
 
         print(f"Loading PyTorch model from: {full_path} on device: {device}")
         try:
             model = None
-            if "unet_forgery.pth" in model_path: # Specific handling for UNet
+            feature_extractor = None # For ViT models
+
+            if "unet_forgery.pth" in model_path:
                 model = UNetModel(in_channels=3, out_channels=1).to(device)
                 state_dict = torch.load(full_path, map_location=device)
                 model.load_state_dict(state_dict)
                 model.eval()
-                model.task = "segmentation" # Set task for UNet
+                model.task = "segmentation"
+            elif "vit_forensic.bin" in model_path: # Specific handling for ViT Forensic
+                print(f"Loading ViTModel and ViTFeatureExtractor from Hugging Face 'google/vit-base-patch16-224'...")
+                feature_extractor = ViTFeatureExtractor.from_pretrained("google/vit-base-patch16-224")
+                model = ViTModel.from_pretrained("google/vit-base-patch16-224").to(device)
+                
+                # If custom weights exist, load them
+                if os.path.exists(full_path):
+                    print(f"Loading custom state_dict for ViT from {full_path}...")
+                    state_dict = torch.load(full_path, map_location=device)
+                    model.load_state_dict(state_dict)
+                model.eval()
+                model.task = "classification" # ViT is used for classification/embedding
+                return {"model": model, "feature_extractor": feature_extractor} # Return both
             else:
-                # Generic loading for other PyTorch models (e.g., classification)
-                # This part would need to be more sophisticated for real generic loading
-                # For now, it will load a dummy if not unet_forgery
                 class LoadedTorchModel(nn.Module):
                     def __init__(self):
                         super().__init__()
-                        self.linear = nn.Linear(10, 2) # Placeholder
+                        self.linear = nn.Linear(10, 2)
                     def forward(self, x):
                         return torch.randn(x.shape[0], 2)
                 
                 model = LoadedTorchModel().to(device)
-                # Attempt to load state_dict if it's a generic .pth file
                 try:
                     state_dict = torch.load(full_path, map_location=device)
                     model.load_state_dict(state_dict)
                     model.eval()
                 except Exception as e:
                     print(f"Warning: Could not load state_dict into generic PyTorch model from {full_path}: {e}. Using random weights.")
-                model.task = "classification" # Default task
+                model.task = "classification"
 
             print(f"PyTorch model '{model_path}' loaded successfully.")
             return model
@@ -114,5 +123,5 @@ class TorchModelLoader(BaseModelLoader):
                 def forward(self, x):
                     return torch.randn(x.shape[0], 2)
             dummy_model = DummyTorchModel().to(device)
-            dummy_model.task = "classification" # Default task for dummy
+            dummy_model.task = "classification"
             return dummy_model
