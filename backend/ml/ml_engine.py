@@ -1,9 +1,11 @@
 import os
 import json
 import logging
+import time # Import time for performance counter
 from typing import Any, Dict, Optional, Tuple
 from PIL import Image
 import numpy as np
+from fastapi import HTTPException, status # Import HTTPException
 
 # Import loaders
 from backend.ml.loaders.base_loader import BaseModelLoader
@@ -53,7 +55,10 @@ class MLEngine:
         config = self.model_configs.get(model_name)
         if not config:
             logger.error(f"Model '{model_name}' not found in registry.")
-            raise ValueError(f"Model '{model_name}' not found in registry.")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Model '{model_name}' not found in registry."
+            )
 
         model_type = config.get("type")
         model_path = config.get("path")
@@ -61,13 +66,25 @@ class MLEngine:
         loader = self.loaders.get(model_type)
         if not loader:
             logger.error(f"No loader found for model type '{model_type}'.")
-            raise ValueError(f"No loader found for model type '{model_type}'.")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"No loader found for model type '{model_type}'."
+            )
 
-        logger.info(f"Loading model '{model_name}' (type: {model_type}, path: {model_path})...")
-        model = loader.load_model(model_path)
-        self.loaded_models[model_name] = model
-        logger.info(f"Model '{model_name}' loaded and cached.")
-        return model
+        start_time = time.perf_counter()
+        try:
+            logger.info(f"Loading model '{model_name}' (type: {model_type}, path: {model_path})...")
+            model = loader.load_model(model_path)
+            self.loaded_models[model_name] = model
+            end_time = time.perf_counter()
+            logger.info(f"Model '{model_name}' loaded successfully in {end_time - start_time:.4f} seconds.")
+            return model
+        except Exception as e:
+            logger.error(f"Failed to load model '{model_name}': {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to load model '{model_name}': {e}"
+            )
 
     def run_inference(self, model_name: str, image: Image.Image, preprocess_params: Optional[Dict[str, Any]] = None, postprocess_params: Optional[Dict[str, Any]] = None) -> Any:
         """
@@ -82,11 +99,15 @@ class MLEngine:
         Returns:
             Any: The post-processed output from the model.
         """
-        model = self.load_model(model_name)
-        config = self.model_configs.get(model_name)
+        model = self.load_model(model_name) # This call now handles its own HTTPException
 
+        config = self.model_configs.get(model_name)
         if not config:
-            raise ValueError(f"Configuration for model '{model_name}' not found.")
+            # This case should ideally be caught by load_model, but as a safeguard
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Configuration for model '{model_name}' not found."
+            )
 
         # Determine preprocessing parameters
         target_size = config.get("input_size", (224, 224)) # Default to 224x224
@@ -98,8 +119,17 @@ class MLEngine:
         }
         final_preprocess_params = {**default_normalize_params, **(preprocess_params or {})}
 
-        logger.debug(f"Preprocessing image for model '{model_name}' with target_size={target_size} and params={final_preprocess_params}")
-        preprocessed_input = preprocess_image(image, target_size, final_preprocess_params)
+        start_preprocess_time = time.perf_counter()
+        try:
+            preprocessed_input = preprocess_image(image, target_size, final_preprocess_params)
+            end_preprocess_time = time.perf_counter()
+            logger.debug(f"Preprocessing for model '{model_name}' completed in {end_preprocess_time - start_preprocess_time:.4f} seconds.")
+        except Exception as e:
+            logger.error(f"Preprocessing failed for model '{model_name}': {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Preprocessing failed for model '{model_name}': {e}"
+            )
 
         # Adjust input shape for PyTorch (NCHW) vs Keras (NHWC) if necessary
         model_type = config.get("type")
@@ -119,27 +149,35 @@ class MLEngine:
         else:
             input_tensor = preprocessed_input # Fallback
 
-        logger.debug(f"Running inference for model '{model_name}' with input shape: {input_tensor.shape}")
-        
-        # Run inference
-        raw_output = None
-        if model_type == "torch":
-            import torch
-            with torch.no_grad():
-                model.eval()
-                raw_output = model(input_tensor).cpu().numpy()
-        elif model_type == "keras":
-            raw_output = model.predict(input_tensor)
-        else:
-            logger.warning(f"Inference for model type '{model_type}' not explicitly handled. Returning dummy output.")
-            raw_output = np.random.rand(1, 2) # Dummy output
+        start_inference_time = time.perf_counter()
+        try:
+            # Run inference
+            raw_output = None
+            if model_type == "torch":
+                import torch
+                with torch.no_grad():
+                    model.eval()
+                    raw_output = model(input_tensor).cpu().numpy()
+            elif model_type == "keras":
+                raw_output = model.predict(input_tensor)
+            else:
+                logger.warning(f"Inference for model type '{model_type}' not explicitly handled. Returning dummy output.")
+                raw_output = np.random.rand(1, 2) # Dummy output
+            end_inference_time = time.perf_counter()
+            logger.info(f"Inference for model '{model_name}' completed in {end_inference_time - start_inference_time:.4f} seconds.")
+        except Exception as e:
+            logger.error(f"Inference failed for model '{model_name}': {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Inference failed for model '{model_name}': {e}"
+            )
 
         # Post-process output
         output_type = config.get("output_type", "classification")
         logger.debug(f"Post-processing output for model '{model_name}' with output_type={output_type}")
         processed_output = postprocess_output(raw_output, output_type, postprocess_params)
 
-        logger.info(f"Inference for model '{model_name}' completed.")
+        logger.info(f"Full inference pipeline for model '{model_name}' completed.")
         return processed_output
 
 # Example usage (can be removed or adapted for actual API integration)
@@ -170,13 +208,20 @@ if __name__ == "__main__":
         unet_output = ml_engine.run_inference("unet", dummy_image, postprocess_params={"threshold": 0.7})
         print(f"UNet Output (mask shape): {unet_output.shape}, unique values: {np.unique(unet_output)}")
 
+        # Test non-existent model
+        try:
+            ml_engine.run_inference("non_existent_model", dummy_image)
+        except HTTPException as e:
+            print(f"Caught expected error for non-existent model: {e.detail}")
+
     except Exception as e:
         print(f"An error occurred during example usage: {e}")
 
-    # Clean up dummy model files
-    os.remove("backend/ml_models/efficientnet.h5")
-    os.remove("backend/ml_models/unet.pth")
-    os.remove("backend/ml_models/vit.pth")
-    os.remove("backend/ml_models/siamese.pth")
-    os.remove("backend/ml_models/gan_fp.pth")
-    os.rmdir("backend/ml_models")
+    finally:
+        # Clean up dummy model files
+        os.remove("backend/ml_models/efficientnet.h5")
+        os.remove("backend/ml_models/unet.pth")
+        os.remove("backend/ml_models/vit.pth")
+        os.remove("backend/ml_models/siamese.pth")
+        os.remove("backend/ml_models/gan_fp.pth")
+        os.rmdir("backend/ml_models")
