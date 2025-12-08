@@ -86,6 +86,8 @@ class ReportGenerator:
         Story.append(Paragraph(f"<b>ELA++ (Anomalies de Compression):</b> {(module_scores.get('ela', 0.0) * 100):.1f}% - {explanation.get('compression', 'N/A')}", normal_style))
         Story.append(Paragraph(f"<b>Copy-Move Detection:</b> {(module_scores.get('copymove', 0.0) * 100):.1f}% - {explanation.get('duplication', 'N/A')}", normal_style))
         Story.append(Paragraph(f"<b>Diffusion Forensics (IA Générative):</b> {(module_scores.get('diffusion', 0.0) * 100):.1f}% - {explanation.get('inpainting', 'N/A')}", normal_style))
+        Story.append(Paragraph(f"<b>Signature Numérique:</b> {(module_scores.get('signature', 0.0) * 100):.1f}% - {explanation.get('signature', 'N/A')}", normal_style))
+        Story.append(Paragraph(f"<b>Objets Intégrés:</b> {(module_scores.get('embedded_objects', 0.0) * 100):.1f}% - {explanation.get('embedded_objects', 'N/A')}", normal_style)) # NEW
         Story.append(Spacer(1, 0.3 * inch))
 
         # --- Section “Heatmaps” ---
@@ -113,7 +115,26 @@ class ReportGenerator:
             else:
                 Story.append(Paragraph(f"<i>Heatmap {label} non générée.</i>", normal_style))
         
-        Story.append(PageBreak()) # Start conclusion on a new page
+        Story.append(PageBreak()) # Start next sections on a new page
+
+        # --- Section "Embedded Objects" --- NEW
+        embedded_objects_info = record.get('embedded_objects_info', {}).get('embeddedObjects', [])
+        if embedded_objects_info:
+            Story.append(Paragraph("<h2>Analyse des Objets Intégrés</h2>", h2_style))
+            suspicious_objects = [obj for obj in embedded_objects_info if obj.get('suspicious')]
+            if suspicious_objects:
+                Story.append(Paragraph(f"<b>{len(suspicious_objects)} objet(s) suspect(s) détecté(s) :</b>", bold_style))
+                for obj in suspicious_objects:
+                    Story.append(Paragraph(f"• ID: {obj.get('objectId', 'N/A')}, Type: {obj.get('type', 'N/A')}, Subtype: {obj.get('subtype', 'N/A')}, Raison: {obj.get('reason', 'N/A')}", normal_style))
+                    if obj.get('preview'):
+                        Story.append(Paragraph(f"  Preview: {obj['preview']}", normal_style))
+                    if obj.get('entropy') is not None:
+                        Story.append(Paragraph(f"  Entropy: {obj['entropy']:.2f}", normal_style))
+                Story.append(Spacer(1, 0.2 * inch))
+            else:
+                Story.append(Paragraph("Aucun objet intégré suspect détecté.", normal_style))
+            Story.append(Spacer(1, 0.3 * inch))
+            Story.append(PageBreak()) # Start conclusion on a new page
 
         # --- Conclusion ---
         Story.append(Paragraph("<h2>Conclusion</h2>", h2_style))
@@ -124,7 +145,7 @@ class ReportGenerator:
         Story.append(Paragraph(f"Date du rapport: {datetime.now().strftime('%d/%m/%Y')}", normal_style))
         Story.append(Paragraph(f"Signature: {settings.PROJECT_NAME}", bold_style))
 
-        # NEW: Integrity Hash
+        # Integrity Hash
         integrity_hash = record.get('integrity_hash')
         if integrity_hash:
             Story.append(Spacer(1, 0.2 * inch))

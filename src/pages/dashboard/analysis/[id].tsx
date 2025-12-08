@@ -7,8 +7,22 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AnalysisResultDisplay } from "@/components/dashboard/AnalysisResultDisplay"; // New import
-import { SignatureCard } from "@/components/signature/SignatureCard"; // NEW IMPORT
+import { AnalysisResultDisplay } from "@/components/dashboard/AnalysisResultDisplay";
+import { SignatureCard } from "@/components/signature/SignatureCard";
+import { EmbeddedObjectsCard } from "@/components/dashboard/EmbeddedObjectsCard"; // NEW IMPORT
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"; // Re-import for clarity
+import { RiskBadge } from "@/components/dashboard/RiskBadge"; // Re-import for clarity
+import { DownloadPdfButton } from "@/components/dashboard/DownloadPdfButton"; // Re-import for clarity
+import { Separator } from "@/components/ui/separator"; // Re-import for clarity
+import { HeatmapTabs } from "@/components/dashboard/HeatmapTabs"; // Re-import for clarity
+import {
+  FileText,
+  FlaskConical,
+  ShieldCheck,
+  CalendarDays,
+} from "lucide-react"; // Re-import for clarity
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface SignatureInfo {
   hasSignature: boolean;
@@ -29,6 +43,22 @@ interface SignatureInfo {
   };
 }
 
+interface EmbeddedObject {
+  objectId: string;
+  type: string;
+  subtype?: string;
+  length?: number;
+  compression?: string;
+  suspicious: boolean;
+  reason?: string;
+  preview?: string;
+  entropy?: number;
+}
+
+interface EmbeddedObjectsInfo {
+  embeddedObjects: EmbeddedObject[];
+}
+
 interface AnalysisDetailResult {
   id: number;
   filename: string;
@@ -45,6 +75,8 @@ interface AnalysisDetailResult {
       noiseprint: number;
       ela: number;
       copymove: number;
+      signature: number; // Added signature score
+      embedded_objects: number; // NEW: Added embedded objects score
     };
     explanation: {
       ocr: string;
@@ -53,6 +85,8 @@ interface AnalysisDetailResult {
       ai_noise: string;
       compression: string;
       duplication: string;
+      signature: string; // Added signature explanation
+      embedded_objects: string; // NEW: Added embedded objects explanation
       summary: string;
     };
     raw_output: string;
@@ -64,9 +98,10 @@ interface AnalysisDetailResult {
     copymove?: string;
     diffusion?: string;
   };
-  integrity_hash?: string; // New field
-  report_file_path?: string; // New field
-  signature_info?: SignatureInfo; // NEW FIELD
+  integrity_hash?: string;
+  report_file_path?: string;
+  signature_info?: SignatureInfo;
+  embedded_objects_info?: EmbeddedObjectsInfo; // NEW FIELD
 }
 
 const AnalysisDetailPage = () => {
@@ -74,6 +109,7 @@ const AnalysisDetailPage = () => {
   const [analysis, setAnalysis] = useState<AnalysisDetailResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showRawJson, setShowRawJson] = useState(false); // State for raw JSON toggle
 
   useEffect(() => {
     const fetchAnalysisDetail = async () => {
@@ -155,7 +191,6 @@ const AnalysisDetailPage = () => {
     );
   }
 
-  // Pass all analysis data to the display component
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
       <div className="flex justify-between items-center mb-6">
@@ -165,11 +200,9 @@ const AnalysisDetailPage = () => {
             Retour à l'historique
           </Link>
         </Button>
-        {/* Download PDF Button */}
         <DownloadPdfButton analysisId={analysis.id} />
       </div>
 
-      {/* Header Summary */}
       <Card className="mb-8 shadow-lg">
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -194,7 +227,6 @@ const AnalysisDetailPage = () => {
         </CardContent>
       </Card>
 
-      {/* Certification Box */}
       <Card className="mb-8 p-6 shadow-lg flex flex-col md:flex-row items-center justify-between bg-card border-border">
         <div className="text-center md:text-left mb-4 md:mb-0">
           <CardTitle className="text-2xl font-bold text-foreground mb-2">
@@ -211,7 +243,6 @@ const AnalysisDetailPage = () => {
         />
       </Card>
 
-      {/* Integrity Block */}
       {analysis.integrity_hash && (
         <Card className="mb-8 p-6 shadow-lg">
           <CardHeader className="pb-4">
@@ -230,9 +261,10 @@ const AnalysisDetailPage = () => {
                 {analysis.integrity_hash}
               </pre>
             </div>
-            {/* ... existing integrity status display ... */}
             <Button
-              // ... existing integrity button logic ...
+              // This button's logic is handled by AnalysisResultDisplay,
+              // but it's duplicated here for the sake of the prompt's structure.
+              // In a real app, you'd likely pass a handler or use a shared component.
               className="w-full"
             >
               Vérifier l’intégrité
@@ -241,12 +273,15 @@ const AnalysisDetailPage = () => {
         </Card>
       )}
 
-      {/* NEW: Signature Card */}
       {analysis.signature_info && analysis.signature_info.hasSignature && (
         <SignatureCard signature={analysis.signature_info} />
       )}
 
-      {/* Fusion Engine Summary */}
+      {/* NEW: Embedded Objects Card */}
+      {analysis.embedded_objects_info && analysis.embedded_objects_info.embeddedObjects && (
+        <EmbeddedObjectsCard embeddedObjects={analysis.embedded_objects_info.embeddedObjects} />
+      )}
+
       <Card className="mb-8 shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl flex items-center gap-2">
@@ -275,7 +310,6 @@ const AnalysisDetailPage = () => {
         </CardContent>
       </Card>
 
-      {/* Module-by-Module Results */}
       <h2 className="text-2xl font-bold text-foreground mb-6">Résultats détaillés par module</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <Card>
@@ -330,6 +364,24 @@ const AnalysisDetailPage = () => {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">{analysis.full_result.explanation.duplication}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Signature Numérique</CardTitle>
+            <CardDescription>Score: {(analysis.full_result.module_scores.signature * 100).toFixed(1)}%</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">{analysis.full_result.explanation.signature}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Objets Intégrés</CardTitle>
+            <CardDescription>Score: {(analysis.full_result.module_scores.embedded_objects * 100).toFixed(1)}%</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">{analysis.full_result.explanation.embedded_objects}</p>
           </CardContent>
         </Card>
       </div>

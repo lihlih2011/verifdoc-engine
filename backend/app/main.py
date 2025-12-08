@@ -4,7 +4,8 @@ from backend.api.vision_api import router as vision_router
 from backend.api.analysis_history import router as analysis_history_router
 from backend.api.report_api import router as report_router
 from backend.api.verify_api import router as verify_router
-from backend.api.signature_api import router as signature_router # New import
+from backend.api.signature_api import router as signature_router
+from backend.api.embedded_api import router as embedded_router # NEW IMPORT
 from backend.app.config import settings
 from backend.app.database import Base, engine
 import os # Import os
@@ -30,7 +31,8 @@ app.include_router(vision_router)
 app.include_router(analysis_history_router)
 app.include_router(report_router)
 app.include_router(verify_router)
-app.include_router(signature_router) # Register the new router
+app.include_router(signature_router)
+app.include_router(embedded_router) # NEW: Register the new router
 
 @app.get("/")
 async def read_root():

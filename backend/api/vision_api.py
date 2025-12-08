@@ -11,7 +11,8 @@ from backend.engine.diffusion_forensics import DiffusionForensics
 from backend.engine.gan_fingerprint import GANFingerprintDetector
 from backend.engine.ela_engine import ELAEngine
 from backend.engine.copymove_engine import CopyMoveEngine
-from backend.engine.signature_engine import SignatureEngine # New import
+from backend.engine.signature_engine import SignatureEngine
+from backend.engine.embedded_object_engine import EmbeddedObjectEngine # NEW IMPORT
 from backend.engine.fusion import FusionEngine
 from backend.engine.heatmap_generator import HeatmapGenerator # Import HeatmapGenerator
 from backend.app.database import get_db # Import get_db
@@ -26,7 +27,8 @@ diffusion_engine = DiffusionForensics(device="cpu")
 noiseprint_engine = GANFingerprintDetector(device="cpu")
 ela_engine = ELAEngine()
 copymove_engine = CopyMoveEngine()
-signature_engine = SignatureEngine() # Initialize SignatureEngine
+signature_engine = SignatureEngine()
+embedded_object_engine = EmbeddedObjectEngine() # NEW INITIALIZATION
 fusion_engine = FusionEngine()
 heatmap_gen = HeatmapGenerator() # Initialize HeatmapGenerator
 
@@ -52,8 +54,12 @@ async def analyze_document(file: UploadFile = File(...), db: Session = Depends(g
         # Run signature analysis if it's a PDF
         signature_res = {"hasSignature": False}
         if file.filename.lower().endswith(".pdf"):
-            # Reset stream for signature engine if needed, or pass raw content
             signature_res = signature_engine.analyze_pdf_signature(content)
+
+        # Run embedded object analysis if it's a PDF
+        embedded_objects_res = {"embeddedObjects": []}
+        if file.filename.lower().endswith(".pdf"):
+            embedded_objects_res["embeddedObjects"] = embedded_object_engine.analyze_pdf_objects(content) # NEW ANALYSIS
 
         # Fusion
         final_result = fusion_engine.fuse({
@@ -63,7 +69,8 @@ async def analyze_document(file: UploadFile = File(...), db: Session = Depends(g
             "noiseprint": noiseprint_res,
             "ela": ela_res,
             "copymove": copymove_res,
-            "signature": signature_res # Include signature results in fusion
+            "signature": signature_res,
+            "embedded_objects": embedded_objects_res # NEW: Include embedded objects results in fusion
         })
 
         # Generate heatmaps
@@ -84,6 +91,7 @@ async def analyze_document(file: UploadFile = File(...), db: Session = Depends(g
             full_result=final_result,
             heatmaps=heatmaps, # Save heatmap paths
             signature_info=signature_res, # Save signature info
+            embedded_objects_info=embedded_objects_res, # NEW: Save embedded objects info
             created_at=datetime.utcnow()
         )
         db.add(record)

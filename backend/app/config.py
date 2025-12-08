@@ -35,7 +35,8 @@ class AIConfig:
     FUSION_NOISEPRINT_WEIGHT: float = 0.2
     FUSION_ELA_WEIGHT: float = 0.1
     FUSION_COPYMOVE_WEIGHT: float = 0.1
-    FUSION_SIGNATURE_WEIGHT: float = 0.1 # New weight for signature analysis
+    FUSION_SIGNATURE_WEIGHT: float = 0.1
+    FUSION_EMBEDDED_OBJECTS_WEIGHT: float = 0.1 # NEW WEIGHT
 
 settings = Settings()
 ai_config = AIConfig()
