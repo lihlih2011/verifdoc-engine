@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VerifDoc - Démo Bêta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617;
+            color: #e2e8f0;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center justify-center p-6" x-data="demoApp()">
+
+    <!-- Nav Return -->
+    <a href="/" class="absolute top-6 left-6 flex items-center gap-2 text-slate-500 hover:text-white transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+            </path>
+        </svg>
+        Retour
+    </a>
+
+    <!-- MAIN CONTAINER -->
+    <div class="w-full max-w-2xl">
+
+        <!-- SECTOR SELECTOR (Hidden in PRODUCTION) -->
+        {% if client_config.ENV != 'PRODUCTION' %}
+        <div class="mb-8 border border-yellow-500/30 bg-yellow-500/10 p-4 rounded-lg">
+            <div class="flex justify-between items-center mb-2">
+                <label class="block text-xs font-bold text-yellow-500 uppercase tracking-wider">Mode Test
+                    (Admin)</label>
+                <span class="text-[10px] text-yellow-500/70">Context: {{ client_config.SECTOR }}</span>
+            </div>
+            <select x-model="sector"
+                class="bg-slate-900 border-yellow-500/30 text-yellow-500 text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5">
+                <option value="GENERIC">Générique</option>
+                <option value="RH">Ressources Humaines</option>
+                <option value="IMMOBILIER">Immobilier</option>
+                <option value="BANQUE">Banque / KYC</option>
+                <option value="JURIDIQUE">Juridique</option>
+            </select>
+        </div>
+        {% endif %}
+
+        <!-- HEADER -->
+        <div class="text-center mb-10">
+            <div
+                class="inline-flex items-center justify-center mb-6 bg-white p-4 rounded-2xl shadow-xl shadow-blue-900/20">
+                <img src="/static/img/logo.png" alt="VerifDoc" class="h-24 w-auto">
+            </div>
+            <h1 class="text-3xl font-bold text-white mb-2">Audit Express (Bêta)</h1>
+            <p class="text-slate-400 text-sm">Tests en conditions réelles. Aucun stockage de fichier.</p>
+        </div>
+
+        <!-- UPLOAD ZONE (State: idle) -->
+        <div x-show="state === 'idle'"
+            class="glass-panel rounded-2xl p-10 text-center transition-all hover:border-blue-500/30">
+            <input type="file" id="fileInput" class="hidden" @change="handleFiles($event.target.files)" accept=".pdf">
+
+            <div class="border-2 border-dashed border-slate-700 rounded-xl p-10 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-800/50 transition"
+                @click="document.getElementById('fileInput').click()" @dragover.prevent
+                @drop.prevent="handleFiles($event.dataTransfer.files)">
+
+                <div class="w-16 h-16 bg-blue-600/10 text-blue-500 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">Déposez votre PDF ici</h3>
+                <p class="text-slate-500 text-sm">ou cliquez pour parcourir</p>
+            </div>
+            <p class="mt-6 text-xs text-slate-600">Formats supportés : PDF natif ou scanné.</p>
+        </div>
+
+        <!-- LOADING (State: analyzing) -->
+        <div x-show="state === 'analyzing'" class="glass-panel rounded-2xl p-16 text-center">
+            <div class="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-6">
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Analyse en cours...</h3>
+            <p class="text-slate-400 text-sm">Examen de la structure et des métadonnées</p>
+        </div>
+
+        <!-- RESULT (State: done) -->
+        <div x-show="state === 'done'" class="glass-panel rounded-2xl overflow-hidden animate-fade-in-up">
+
+            <!-- STATUS HEADER -->
+            <div class="p-8 text-center border-b border-slate-800" :class="statusBg">
+                <div
+                    class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 bg-white/10 backdrop-blur-sm shadow-lg">
+                    <span class="text-4xl" x-text="statusIcon"></span>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2" x-text="statusTitle"></h2>
+                <p class="text-white/80 text-sm" x-text="statusMsg"></p>
+            </div>
+
+            <!-- RECOMMENDATIONS (Proactive Addition) -->
+            <div class="px-8 py-6 bg-slate-800/50 border-b border-slate-800">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Recommandations
+                    Opérationnelles</h4>
+                <ul class="text-sm space-y-2">
+                    <template x-for="rec in activeRecommendations">
+                        <li class="flex items-start gap-2 text-slate-300">
+                            <!-- Dynamic Icon based on status -->
+                            <span class="mt-0.5 font-bold" :class="{
+                                      'text-emerald-500': statusColor === 'GREEN',
+                                      'text-amber-500': statusColor === 'YELLOW',
+                                      'text-red-500': statusColor === 'RED'
+                                  }" x-text="statusColor === 'GREEN' ? '✓' : (statusColor === 'RED' ? '➜' : '➜')">
+                            </span>
+                            <span x-text="rec"></span>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+
+            <!-- MANDATORY CONTEXT -->
+            <div class="p-8 bg-slate-900/50">
+                <div class="flex gap-4 items-start p-4 rounded-lg bg-blue-900/20 border border-blue-500/20 mb-8">
+                    <svg class="w-6 h-6 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div class="text-sm text-blue-200">
+                        <p class="font-bold mb-1">Clause de contexte</p>
+                        <p class="opacity-80">Cette analyse repose sur une convergence d’indices techniques automatisés.
+                            Elle constitue une aide à la décision et ne saurait remplacer une expertise humaine ou une
+                            certification légale.</p>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <!-- DOWNLOAD REPORT -->
+                    <a :href="result.report_url" target="_blank" x-show="result && result.report_url"
+                        class="inline-block w-full md:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-blue-500/30 transition-all mb-4">
+                        📄 Télécharger le rapport
+                    </a>
+
+                    <div class="h-4"></div>
+
+                    <button @click="reset()"
+                        class="px-6 py-3 border border-slate-700 hover:bg-slate-800 text-slate-300 font-medium rounded-lg transition-all w-full md:w-auto">
+                        Nouvelle Analyse
+                    </button>
+                    <p class="mt-6 text-xs text-slate-600">Fichier purgé de la mémoire.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const SECTOR_TEMPLATES = {
+            "GENERIC": {
+                "GREEN": { "title": "Structure Technique Valide", "summary": "Structure standard sans anomalies détectables.", "recs": ["Utilisation possible.", "Vérification standard."] },
+                "YELLOW": { "title": "Document Atypique - À Vérifier", "summary": "Marqueurs techniques atypiques relevés.", "recs": ["Vérifier la provenance.", "Comparer avec l'original."] },
+                "RED": { "title": "Anomalies Techniques Critiques", "summary": "Ruptures de cohérence majeures identifiées.", "recs": ["Suspendre le traitement.", "Demander l'original papier."] }
+            },
+            "RH": {
+                "GREEN": { "title": "Dossier Candidat - Cohérent", "summary": "Standards respectés (CV, Diplômes).", "recs": ["Poursuivre le recrutement."] },
+                "YELLOW": { "title": "Dossier Candidat - Vigilance", "summary": "Traces d'édition récente ou outils en ligne.", "recs": ["Vérifier les dates du CV.", "Demander les originaux."] },
+                "RED": { "title": "Dossier Candidat - Risque Élevé", "summary": "Incohérences suggérant une modification volontaire.", "recs": ["Ne pas engager sur cette base.", "Contrôle de référence requis."] }
+            },
+            "IMMOBILIER": {
+                "GREEN": { "title": "Dossier Locataire - Standard", "summary": "Justificatifs intègres.", "recs": ["Valider la complétude.", "Étude de solvabilité."] },
+                "YELLOW": { "title": "Dossier Locataire - À Vérifier", "summary": "Discordances d'historique ou outils en ligne.", "recs": ["Vérifier via Véerif'Avis.", "Contacter l'employeur."] },
+                "RED": { "title": "Dossier Locataire - Non Conforme", "summary": "Indices forts de falsification (montants/dates).", "recs": ["Refuser le dossier.", "Ne signer aucun bail."] }
+            },
+            "BANQUE": {
+                "GREEN": { "title": "KYC - Conforme", "summary": "Normes d'intégrité respectées.", "recs": ["Valider KYC Level 1.", "Archiver."] },
+                "YELLOW": { "title": "KYC - Review Manuelle", "summary": "Conversion atypique ou non-natif.", "recs": ["Escalader au niveau 2.", "Mettre En Attente."] },
+                "RED": { "title": "KYC - Rejet Technique", "summary": "Anomalies incompatibles compliance.", "recs": ["Rejeter l'entrée en relation.", "Signalement fraude."] }
+            },
+            "JURIDIQUE": {
+                "GREEN": { "title": "Pièce Probante - Validée", "summary": "Chaîne de garde compatible.", "recs": ["Admettre au dossier."] },
+                "YELLOW": { "title": "Pièce Probante - Réserves", "summary": "Rupture potentielle chaîne de preuve.", "recs": ["Émettre une réserve.", "Expertise contradictoire."] },
+                "RED": { "title": "Pièce Probante - Compromise", "summary": "Manipulations postérieures détectées.", "recs": ["Écarter du dossier.", "Contester l'authenticité."] }
+            }
+        };
+
+        function demoApp() {
+            return {
+                state: 'idle',
+                result: null,
+                // Initialize with Admin Config from Backend
+                sector: "{{ client_config.SECTOR }}",
+
+                handleFiles(files) {
+                    if (!files || files.length === 0) return;
+                    this.state = 'analyzing';
+
+                    const formData = new FormData();
+                    formData.append('files', files[0]);
+                    formData.append('sector', this.sector);
+
+                    fetch('/api/v1/batch-analyze', { method: 'POST', body: formData })
+                        .then(res => res.json())
+                        .then(data => {
+                            this.result = (data.individual_reports && data.individual_reports[0]) ? data.individual_reports[0] : data;
+                            this.state = 'done';
+                        })
+                        .catch(err => {
+                            alert("Erreur de service.");
+                            this.state = 'idle';
+                        });
+                },
+
+                reset() {
+                    this.state = 'idle';
+                    this.result = null;
+                },
+
+                get statusColor() {
+                    if (!this.result) return 'gray';
+                    const v = this.result.verdict || '';
+                    if (v === 'FRAUDULENT' || v === 'REFUSED') return 'RED';
+                    if (v === 'SUSPICIOUS' || v === 'RESERVED') return 'YELLOW';
+                    if (v === 'VALID') return 'GREEN';
+
+                    // Fallback Score
+                    const score = this.result.score || 0;
+                    if (score > 30) return 'RED';
+                    if (score > 10) return 'YELLOW';
+                    return 'GREEN';
+                },
+
+                get statusBg() {
+                    if (this.statusColor === 'RED') return 'bg-red-600';
+                    if (this.statusColor === 'YELLOW') return 'bg-amber-500';
+                    return 'bg-emerald-600';
+                },
+
+                get statusIcon() {
+                    if (this.statusColor === 'RED') return '⚠️';
+                    if (this.statusColor === 'YELLOW') return '✋';
+                    return '✅';
+                },
+
+                // DYNAMIC TEMPLATE LOOKUP
+                get templates() {
+                    const sec = SECTOR_TEMPLATES[this.sector] || SECTOR_TEMPLATES['GENERIC'];
+                    return sec[this.statusColor] || sec['GREEN'];
+                },
+
+                get statusTitle() {
+                    return this.templates.title;
+                },
+
+                get statusMsg() {
+                    return this.templates.summary;
+                },
+
+                get activeRecommendations() {
+                    return this.templates.recs;
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

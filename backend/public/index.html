@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>VerifDoc — Analyse</title>
+</head>
+<body>
+
+<h1>VerifDoc — Analyse de document</h1>
+
+<input type="file" id="file">
+<br><br>
+<button id="btn">Analyser</button>
+
+<p id="status"></p>
+<pre id="result"></pre>
+
+<script>
+document.getElementById("btn").onclick = async () => {
+  const fileInput = document.getElementById("file");
+  const status = document.getElementById("status");
+  const result = document.getElementById("result");
+
+  status.textContent = "";
+  result.textContent = "";
+
+  if (!fileInput.files.length) {
+    status.textContent = "Aucun fichier sélectionné";
+    return;
+  }
+
+  status.textContent = "Analyse en cours...";
+
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
+
+  try {
+    const res = await fetch("/analyze", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+
+    status.textContent = "Analyse terminée";
+    result.textContent = JSON.stringify(data, null, 2);
+
+  } catch (e) {
+    status.textContent = "ERREUR JS";
+    console.error(e);
+  }
+};
+</script>
+
+</body>
+</html>

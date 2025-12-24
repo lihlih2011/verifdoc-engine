@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VerifDoc MVP - Test Complet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .upload-section {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            background: #f8f9ff;
+            transition: all 0.3s;
+        }
+        
+        .upload-section.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            margin: 20px 0;
+        }
+        
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-input-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        
+        .file-input-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .file-name {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .analyze-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        .analyze-button:hover:not(:disabled) {
+            background: #218838;
+            transform: scale(1.05);
+        }
+        
+        .analyze-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .results-section {
+            margin-top: 40px;
+            display: none;
+        }
+        
+        .results-section.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-card {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .verdict {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .verdict.valide {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+        
+        .verdict.suspect {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffc107;
+        }
+        
+        .verdict.falsifie {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+        
+        .score {
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        
+        .score-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .score-fill {
+            height: 100%;
+            transition: width 1s;
+            border-radius: 15px;
+        }
+        
+        .score-fill.high {
+            background: linear-gradient(90deg, #28a745, #20c997);
+        }
+        
+        .score-fill.medium {
+            background: linear-gradient(90deg, #ffc107, #fd7e14);
+        }
+        
+        .score-fill.low {
+            background: linear-gradient(90deg, #dc3545, #c82333);
+        }
+        
+        .anomalies {
+            margin-top: 20px;
+        }
+        
+        .anomalies h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .anomalies ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .anomalies li {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            border-left: 3px solid #dc3545;
+        }
+        
+        .ela-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #fff3cd;
+            border-radius: 10px;
+            border-left: 5px solid #ffc107;
+        }
+        
+        .ela-anomaly {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 3px solid #ffc107;
+        }
+        
+        .ela-anomaly.copy {
+            border-left-color: #007bff;
+        }
+        
+        .ela-anomaly.move {
+            border-left-color: #ffc107;
+        }
+        
+        .ela-anomaly.add {
+            border-left-color: #dc3545;
+        }
+        
+        .agent-results {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e9ecef;
+        }
+        
+        .agent-card {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .agent-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #dc3545;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-card .label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 VerifDoc MVP - Test Complet</h1>
+            <p>Test de détection de documents falsifiés avec IA + ELA + Analyse de contenu</p>
+        </div>
+        
+        <div class="content">
+            <div class="upload-section" id="uploadSection">
+                <h2>📄 Téléversez un document à analyser</h2>
+                <p style="margin: 20px 0; color: #666;">
+                    Formats supportés: JPG, PNG, PDF<br>
+                    <small>Testez avec des documents originaux, modifiés ou falsifiés</small>
+                </p>
+                <div class="file-input-wrapper">
+                    <input type="file" id="fileInput" accept="image/*,.pdf" />
+                    <label for="fileInput" class="file-input-button">
+                        📁 Choisir un fichier
+                    </label>
+                </div>
+                <div class="file-name" id="fileName"></div>
+                <button class="analyze-button" id="analyzeButton" disabled>
+                    🔍 Analyser le document
+                </button>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 20px; font-size: 1.2em; color: #667eea;">
+                    Analyse en cours...<br>
+                    <small>Les agents IA (OpenAI + Gemini) et l'analyse ELA travaillent...</small>
+                </p>
+            </div>
+            
+            <div class="results-section" id="resultsSection">
+                <div class="result-card">
+                    <h2>📊 Résultats de l'analyse complète</h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="value" id="confidenceValue">0</div>
+                            <div class="label">Score de confiance</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="value" id="anomaliesCount">0</div>
+                            <div class="label">Anomalies détectées</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="value" id="elaCount">0</div>
+                            <div class="label">Anomalies ELA</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="value" id="agentsCount">0</div>
+                            <div class="label">Agents utilisés</div>
+                        </div>
+                    </div>
+                    
+                    <div id="verdict" class="verdict"></div>
+                    
+                    <div class="score">
+                        <strong>Score de confiance:</strong> <span id="confidenceScore">0</span>/100
+                        <div class="score-bar">
+                            <div class="score-fill" id="scoreFill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="anomalies" id="anomalies">
+                        <h3>⚠️ Anomalies détectées:</h3>
+                        <ul id="anomaliesList"></ul>
+                    </div>
+                    
+                    <div class="ela-section" id="elaSection" style="display: none;">
+                        <h3>🔍 Error Level Analysis (ELA)</h3>
+                        <p style="margin-bottom: 15px;"><strong id="elaCountText">0 anomalie(s) de compression détectée(s)</strong></p>
+                        <div id="elaAnomaliesList"></div>
+                        <p style="margin-top: 15px; font-size: 0.9em; color: #856404;">
+                            <strong>Explication:</strong> L'analyse ELA détecte les modifications en comparant les niveaux d'erreur de compression.
+                        </p>
+                    </div>
+                    
+                    <div class="agent-results" id="agentResults"></div>
+                </div>
+            </div>
+            
+            <div class="error" id="error" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const analyzeButton = document.getElementById('analyzeButton');
+        const uploadSection = document.getElementById('uploadSection');
+        const loading = document.getElementById('loading');
+        const resultsSection = document.getElementById('resultsSection');
+        const errorDiv = document.getElementById('error');
+        
+        let selectedFile = null;
+        
+        // Drag & drop
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+        
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+        
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+        
+        function handleFileSelect(file) {
+            selectedFile = file;
+            fileName.textContent = `📄 ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+            analyzeButton.disabled = false;
+        }
+        
+        analyzeButton.addEventListener('click', async () => {
+            if (!selectedFile) return;
+            
+            resultsSection.classList.remove('show');
+            errorDiv.style.display = 'none';
+            
+            loading.classList.add('show');
+            analyzeButton.disabled = true;
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                displayResults(result);
+                
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                loading.classList.remove('show');
+                analyzeButton.disabled = false;
+            }
+        });
+        
+        function displayResults(result) {
+            // Verdict
+            const verdictDiv = document.getElementById('verdict');
+            verdictDiv.textContent = result.verdict;
+            verdictDiv.className = 'verdict ' + getVerdictClass(result.verdict);
+            
+            // Stats
+            document.getElementById('confidenceValue').textContent = result.confidenceScore || 0;
+            document.getElementById('anomaliesCount').textContent = result.anomalies ? result.anomalies.length : 0;
+            document.getElementById('elaCount').textContent = result.elaAnomalies ? result.elaAnomalies.length : 0;
+            document.getElementById('agentsCount').textContent = result.agentsUsed || 0;
+            
+            // Score
+            const score = result.confidenceScore || 0;
+            document.getElementById('confidenceScore').textContent = score;
+            
+            const scoreFill = document.getElementById('scoreFill');
+            scoreFill.style.width = score + '%';
+            scoreFill.className = 'score-fill ' + getScoreClass(score);
+            
+            // Anomalies
+            const anomaliesList = document.getElementById('anomaliesList');
+            anomaliesList.innerHTML = '';
+            if (result.anomalies && result.anomalies.length > 0) {
+                result.anomalies.forEach(anomaly => {
+                    const li = document.createElement('li');
+                    li.textContent = `⚠️ ${anomaly}`;
+                    anomaliesList.appendChild(li);
+                });
+            } else {
+                anomaliesList.innerHTML = '<li style="color: #28a745;">✅ Aucune anomalie détectée</li>';
+            }
+            
+            // ELA Anomalies
+            const elaSection = document.getElementById('elaSection');
+            const elaAnomaliesList = document.getElementById('elaAnomaliesList');
+            const elaCountText = document.getElementById('elaCountText');
+            
+            if (result.elaAnomalies && result.elaAnomalies.length > 0) {
+                elaSection.style.display = 'block';
+                elaCountText.textContent = `${result.elaAnomalies.length} anomalie(s) de compression détectée(s)`;
+                elaAnomaliesList.innerHTML = '';
+                
+                result.elaAnomalies.forEach(ela => {
+                    const div = document.createElement('div');
+                    div.className = 'ela-anomaly ' + ela.type;
+                    div.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                            <strong style="text-transform: uppercase;">
+                                ${ela.type === 'copy' ? '📋 COPY' : ela.type === 'move' ? '↔️ MOVE' : ela.type === 'add' ? '➕ ADD' : '⚠️ UNKNOWN'}
+                            </strong>
+                            <span style="background: #e9ecef; padding: 3px 10px; border-radius: 15px; font-size: 0.9em;">
+                                Confiance: ${ela.confidence}%
+                            </span>
+                        </div>
+                        <p style="margin: 5px 0; color: #495057;">${ela.description || 'Anomalie de compression détectée'}</p>
+                        ${ela.region ? `<p style="margin: 5px 0; font-size: 0.9em; color: #6c757d;">Région: x=${ela.region.x}, y=${ela.region.y}, largeur=${ela.region.width}, hauteur=${ela.region.height}</p>` : ''}
+                        ${ela.errorLevel ? `<p style="margin: 5px 0; font-size: 0.9em; color: #6c757d;">Niveau d'erreur: ${ela.errorLevel}</p>` : ''}
+                    `;
+                    elaAnomaliesList.appendChild(div);
+                });
+            } else {
+                elaSection.style.display = 'none';
+            }
+            
+            // Agent Results
+            const agentResults = document.getElementById('agentResults');
+            if (result.agentResults && result.agentResults.length > 0) {
+                agentResults.innerHTML = '<h3>🤖 Résultats par agent:</h3>';
+                result.agentResults.forEach(agent => {
+                    const card = document.createElement('div');
+                    card.className = 'agent-card';
+                    card.innerHTML = `
+                        <h4>${agent.agentName}</h4>
+                        <p><strong>Verdict:</strong> ${agent.verdict}</p>
+                        <p><strong>Score:</strong> ${agent.confidenceScore}/100</p>
+                        <p><strong>Anomalies:</strong> ${agent.anomalyCount}</p>
+                        ${agent.elaAnomalyCount ? `<p><strong>Anomalies ELA:</strong> ${agent.elaAnomalyCount}</p>` : ''}
+                    `;
+                    agentResults.appendChild(card);
+                });
+            }
+            
+            resultsSection.classList.add('show');
+        }
+        
+        function getVerdictClass(verdict) {
+            if (verdict.includes('VALIDE')) return 'valide';
+            if (verdict.includes('SUSPECT')) return 'suspect';
+            if (verdict.includes('FALSIFIÉ')) return 'falsifie';
+            return 'suspect';
+        }
+        
+        function getScoreClass(score) {
+            if (score >= 75) return 'high';
+            if (score >= 50) return 'medium';
+            return 'low';
+        }
+        
+        function showError(message) {
+            errorDiv.textContent = `❌ Erreur: ${message}`;
+            errorDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+

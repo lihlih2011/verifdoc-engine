@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarifs VerifDoc | Solutions Forensiques Professionnelles</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0EA5E9;
+            --secondary: #6366F1;
+            --background: #020617;
+            --surface: #0F172A;
+            --text-main: #F8FAFC;
+            --text-dim: #94A3B8;
+            --gold: #F59E0B;
+            --green: #10B981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 10%;
+            position: fixed;
+            width: 100%;
+            z-index: 100;
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo-icon::after {
+            content: '';
+            width: 14px;
+            height: 14px;
+            background: var(--gold);
+            border-radius: 2px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        .btn-nav {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 99px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-nav:hover {
+            background: white;
+            color: var(--background);
+            transform: translateY(-2px);
+        }
+
+        header {
+            padding: 12rem 10% 6rem;
+            text-align: center;
+        }
+
+        .badge {
+            background: rgba(14, 165, 233, 0.1);
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 99px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(14, 165, 233, 0.2);
+            display: inline-block;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+            font-weight: 800;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+        }
+
+        .pricing-toggle {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 4rem;
+        }
+
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-dim);
+            padding: 0.75rem 1.5rem;
+            border-radius: 99px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border-color: transparent;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 10%;
+        }
+
+        .pricing-card {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 3rem;
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 30px 60px rgba(14, 165, 233, 0.2);
+        }
+
+        .pricing-card.featured {
+            border-color: var(--gold);
+            background: linear-gradient(145deg, var(--surface), #1e293b);
+        }
+
+        .featured-badge {
+            position: absolute;
+            top: -15px;
+            right: 30px;
+            background: linear-gradient(to right, var(--gold), #fb923c);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .plan-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .plan-desc {
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .price {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .price-period {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-plan {
+            width: 100%;
+            padding: 1.25rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            transition: all 0.3s;
+            margin-bottom: 2rem;
+        }
+
+        .btn-plan-primary {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+        }
+
+        .btn-plan-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 40px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn-plan-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .btn-plan-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .features {
+            list-style: none;
+        }
+
+        .features li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .features li::before {
+            content: '✓';
+            color: var(--green);
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        .features li.disabled {
+            opacity: 0.3;
+        }
+
+        .features li.disabled::before {
+            content: '✗';
+            color: var(--text-dim);
+        }
+
+        .comparison {
+            padding: 6rem 10%;
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        .comparison h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .comparison-table {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--surface);
+            border-radius: 24px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        th {
+            background: rgba(14, 165, 233, 0.1);
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+        }
+
+        .check {
+            color: var(--green);
+            font-size: 1.5rem;
+        }
+
+        footer {
+            padding: 4rem 10%;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-dim);
+            font-size: 0.875rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="logo">
+            <div class="logo-icon"></div>
+            VERIFDOC
+        </div>
+        <div class="nav-links">
+            <a href="/">Accueil</a>
+            <a href="/pricing">Tarifs</a>
+            <a href="/dashboard" class="btn-nav">Accès Dashboard</a>
+        </div>
+    </nav>
+
+    <header>
+        <div class="badge">TARIFICATION TRANSPARENTE</div>
+        <h1>Choisissez votre plan</h1>
+        <p class="subtitle">Des solutions forensiques adaptées à chaque besoin, du freelance à l'entreprise.</p>
+
+        <div class="pricing-toggle">
+            <button class="toggle-btn active">Mensuel</button>
+            <button class="toggle-btn">Annuel <span
+                    style="color: var(--green); margin-left: 0.5rem;">-20%</span></button>
+        </div>
+    </header>
+
+    <div class="pricing-grid">
+        <!-- FREE PLAN -->
+        <div class="pricing-card">
+            <div class="plan-name">Découverte</div>
+            <div class="plan-desc">Pour tester la puissance de VerifDoc</div>
+            <div class="price">0€</div>
+            <div class="price-period">Gratuit à vie</div>
+            <a href="/dashboard?plan=free" class="btn-plan btn-plan-secondary">Commencer Gratuitement</a>
+            <ul class="features">
+                <li>5 analyses / mois</li>
+                <li>Détection ELA & Luminance</li>
+                <li>Rapport PDF basique</li>
+                <li>Support communautaire</li>
+                <li class="disabled">MRZ Scanner</li>
+                <li class="disabled">Analyse multi-documents</li>
+                <li class="disabled">API Access</li>
+            </ul>
+        </div>
+
+        <!-- PRO PLAN (FEATURED) -->
+        <div class="pricing-card featured">
+            <div class="featured-badge">⭐ Populaire</div>
+            <div class="plan-name">Professionnel</div>
+            <div class="plan-desc">Pour les experts et cabinets indépendants</div>
+            <div class="price">99€</div>
+            <div class="price-period">par mois</div>
+            <a href="/dashboard?plan=pro" class="btn-plan btn-plan-primary">Démarrer l'Essai Gratuit</a>
+            <ul class="features">
+                <li>500 analyses / mois</li>
+                <li>Toutes les détections forensiques</li>
+                <li>MRZ Scanner (ID/Passeport)</li>
+                <li>Clone & Splicing Detection</li>
+                <li>Analyse multi-documents (Batch)</li>
+                <li>Rapport PDF Premium</li>
+                <li>Support prioritaire (24h)</li>
+                <li class="disabled">API Access</li>
+                <li class="disabled">White-label</li>
+            </ul>
+        </div>
+
+        <!-- ENTERPRISE PLAN -->
+        <div class="pricing-card">
+            <div class="plan-name">Entreprise</div>
+            <div class="plan-desc">Pour les banques et grandes organisations</div>
+            <div class="price">Sur Devis</div>
+            <div class="price-period">Tarif personnalisé</div>
+            <a href="mailto:sales@verifdoc.com" class="btn-plan btn-plan-secondary">Contactez-nous</a>
+            <ul class="features">
+                <li>Analyses illimitées</li>
+                <li>Toutes les fonctionnalités Pro</li>
+                <li>API REST complète</li>
+                <li>White-label & Custom Branding</li>
+                <li>Déploiement On-Premise</li>
+                <li>SLA 99.9% garanti</li>
+                <li>Support dédié (1h)</li>
+                <li>Formation personnalisée</li>
+                <li>Intégration sur mesure</li>
+            </ul>
+        </div>
+    </div>
+
+    <section class="comparison">
+        <h2>Comparaison Détaillée</h2>
+        <div class="comparison-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fonctionnalité</th>
+                        <th>Découverte</th>
+                        <th>Professionnel</th>
+                        <th>Entreprise</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Analyses mensuelles</td>
+                        <td>5</td>
+                        <td>500</td>
+                        <td>Illimité</td>
+                    </tr>
+                    <tr>
+                        <td>ELA & Luminance</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Clone & Splicing Detection</td>
+                        <td>—</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>MRZ Scanner (ID/Passeport)</td>
+                        <td>—</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Analyse Multi-Documents</td>
+                        <td>—</td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>API REST</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>White-label</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td>Support</td>
+                        <td>Communauté</td>
+                        <td>Prioritaire (24h)</td>
+                        <td>Dédié (1h)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <footer>
+        <div>&copy; 2025 VerifDoc SaaS. Tous droits réservés.</div>
+        <div class="footer-links">
+            <span>CGV</span>
+            <span>Politique de Confidentialité</span>
+            <span>Support</span>
+        </div>
+    </footer>
+
+</body>
+
+</html>

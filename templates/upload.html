@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VerifDoc – Upload</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body class="bg-slate-900 text-slate-200 flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-2xl p-6 glass-panel rounded-2xl" x-data="app()">
+        <h2 class="text-2xl font-bold mb-4 text-center">Uploader un document</h2>
+        <div x-show="state === 'idle'"
+            class="border-2 border-dashed border-slate-700 rounded-2xl bg-slate-900/50 hover:bg-slate-800/50 hover:border-blue-500/50 transition-all cursor-pointer h-64 flex flex-col items-center justify-center"
+            @dragover.prevent="dragover = true" @dragleave="dragover = false" @drop.prevent="handleDrop($event)"
+            @click="$refs.fileInput.click()">
+            <input type="file" x-ref="fileInput" class="hidden" accept=".pdf,.jpg,.jpeg,.png"
+                @change="handleFiles($event.target.files)">
+            <svg class="w-12 h-12 text-blue-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <p class="text-slate-400">Glissez‑déposez ou cliquez pour sélectionner un fichier</p>
+        </div>
+        <div x-show="state === 'analyzing'" class="flex flex-col items-center justify-center mt-4">
+            <p class="text-blue-400 mb-2">Analyse en cours…</p>
+            <div class="w-12 h-12 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+        </div>
+        <div x-show="state === 'done'" class="mt-4">
+            <p class="text-green-400 font-bold" x-text="'Analyse terminée. Score : ' + score"></p>
+            <p class="mt-2" x-text="verdictText"></p>
+        </div>
+    </div>
+</body>
+
+</html>

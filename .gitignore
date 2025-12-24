@@ -1,24 +1,44 @@
-# Logs
-logs
-*.log
-npm-debug.log*
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+.venv
+
+# Node
+node_modules/
+npm-debug.log
+pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Data
+data.mdb
+data.mdb.zip
+dataset.zip
+dataset/
+DATASET_CASIA/
+verifdoc_colab_pack_v2.zip
+verifdoc_colab_pack.zip
+static/reports/*
+!static/reports/.gitkeep
+verifdoc_engine/
+DATASET_REAL/
+final_results_extracted/
+final_rescue_extracted/
+resultats_verifdoc.zip
+resultats_verifdoc_final.zip
+*.zip
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# IDE
+.vscode/
+.idea/
+
+# Misc
+*.log
+GO_ONLINE.bat
+local_test.bat
+PUSH_TO_GITHUB.bat
+CLEAN_GIT.bat

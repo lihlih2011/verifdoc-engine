@@ -1,0 +1,9 @@
+llm:
+  primary: ollama
+  gemini:
+    model: "gemini-1.5-flash"
+    api_key: "PASTE_YOUR_GEMINI_API_KEY_HERE" # User should replace this or use environment variable
+  fallback: ollama
+  ollama:
+    model: "phi4:latest"
+    host: "http://127.0.0.1:11434"

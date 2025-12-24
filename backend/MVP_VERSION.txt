@@ -1,0 +1,23 @@
+﻿VerifDoc MVP v1.0
+================
+
+Statut : GELÉ
+Date   : 2025-12-16 14:23
+
+Fonctionnalités incluses :
+- API POST /analyze
+- Upload fichier
+- Services forensic (OCR / ELA / Metadata / Integrity) [mock]
+- Moteur forensic avec règles critiques (override)
+- Scoring explicable
+- Rapport JSON structuré
+- Hash SHA-256 de preuve
+
+Hors périmètre :
+- Interface web
+- IA avancée (DL / CNN)
+- Authentification
+- Stockage long terme
+
+Décision :
+Toute évolution = v2.x

@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>VerifDoc — Rapport</title>
+  <style>
+    body { font-family: Arial; padding: 30px; }
+    .ok { color: green; font-weight: bold; }
+    .bad { color: red; font-weight: bold; }
+    pre { background: #f3f4f6; padding: 15px; }
+  </style>
+</head>
+<body>
+  <h2>Rapport VerifDoc</h2>
+
+  <h3 id="verdict">Analyse en attente…</h3>
+  <pre id="out"></pre>
+
+  <script>
+    async function loadLast() {
+      // Demande au serveur la dernière entrée connue
+      const res = await fetch("/api/registry/verify");
+      if (!res.ok) return;
+
+      const data = await res.json();
+
+      const v = document.getElementById("verdict");
+      if (data.status === "OK" && data.entries > 0) {
+        v.textContent = "AUTHENTIQUE ✔";
+        v.className = "ok";
+        document.getElementById("out").textContent =
+          JSON.stringify(data, null, 2);
+      } else {
+        v.textContent = "ALTÉRÉ ✖";
+        v.className = "bad";
+        document.getElementById("out").textContent =
+          JSON.stringify(data, null, 2);
+      }
+    }
+
+    loadLast();
+  </script>
+</body>
+</html>

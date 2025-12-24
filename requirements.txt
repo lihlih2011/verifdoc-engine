@@ -1,0 +1,17 @@
+# --- CORE DEPENDENCIES (PRODUCTION) ---
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+fpdf==1.7.2
+pikepdf==8.7.1
+Pillow==10.1.0
+pdfminer.six==20221105
+pytesseract==0.3.10
+numpy==1.26.2
+opencv-python-headless==4.8.1.78
+google-generativeai==0.3.1
+python-dotenv==1.0.0
+
+# --- DEV/TEST DEPENDENCIES (OPTIONAL) ---
+httpx==0.27.0
+pytest==8.0.0

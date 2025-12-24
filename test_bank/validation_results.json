@@ -1,0 +1,44 @@
+[
+  {
+    "file": "orange_bill.pdf",
+    "sector": "real",
+    "score": 85,
+    "verdict": "FRAUDULENT",
+    "evidence_count": 3
+  },
+  {
+    "file": "synthetic_rib_001.pdf",
+    "sector": "banking",
+    "score": 50,
+    "verdict": "FRAUDULENT",
+    "evidence_count": 1
+  },
+  {
+    "file": "synthetic_payslip_001.pdf",
+    "sector": "employment",
+    "score": 0,
+    "verdict": "VALID",
+    "evidence_count": 0
+  },
+  {
+    "file": "free_bill.pdf",
+    "sector": "utilities",
+    "score": 85,
+    "verdict": "FRAUDULENT",
+    "evidence_count": 3
+  },
+  {
+    "file": "orange_bill.pdf",
+    "sector": "utilities",
+    "score": 85,
+    "verdict": "FRAUDULENT",
+    "evidence_count": 3
+  },
+  {
+    "file": "synthetic_invoice_edf_001.pdf",
+    "sector": "utilities",
+    "score": 0,
+    "verdict": "VALID",
+    "evidence_count": 0
+  }
+]

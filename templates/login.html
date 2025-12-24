@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - VerifDoc Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617;
+            color: #e2e8f0;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center relative overflow-hidden">
+
+    <!-- Background Decor -->
+    <div class="absolute inset-0 z-0">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[100px]"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[100px]"></div>
+    </div>
+
+    <!-- Login Card -->
+    <div class="glass-panel w-full max-w-md p-8 rounded-2xl relative z-10 shadow-2xl">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-white mb-2">Espace Professionnel</h1>
+            <p class="text-slate-400 text-sm">Accédez à la suite d'audit complète.</p>
+        </div>
+
+        <form action="/dashboard" method="GET" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Identifiant</label>
+                <input type="email" value="demo@verifdoc.io"
+                    class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none transition"
+                    readonly>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Mot de passe</label>
+                <input type="password" value="password"
+                    class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none transition"
+                    readonly>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-lg shadow-blue-900/20 transition-all transform hover:scale-[1.02]">
+                Connexion
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <a href="/" class="text-sm text-slate-500 hover:text-white transition">Retour au site public</a>
+        </div>
+    </div>
+
+</body>
+
+</html>

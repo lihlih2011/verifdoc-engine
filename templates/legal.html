@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentions Légales - VERIFDOC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+    <!-- NAV -->
+    <nav
+        class="w-full p-6 flex justify-between items-center backdrop-blur-md bg-slate-900/50 fixed top-0 z-50 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+            <div class="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white">V</div>
+            <span class="font-bold text-lg tracking-tight text-white">VERIFDOC</span>
+        </div>
+        <a href="/" class="text-sm text-slate-400 hover:text-white transition">Retour Accueil</a>
+    </nav>
+
+    <!-- CONTENT -->
+    <main class="flex-grow pt-32 pb-20 px-6 max-w-4xl mx-auto w-full">
+        <h1 class="text-4xl font-bold text-white mb-10">Mentions Légales & Conformité</h1>
+
+        <!-- 1. IDENTITE -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold text-blue-400 mb-4">1. Édition du Site</h2>
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 space-y-2 text-slate-300 text-sm">
+                <p><strong>Dénomination :</strong> VERIFDOC (Projet Bêta)</p>
+                <p><strong>Objet :</strong> Plateforme d'aide à la décision pour l'analyse documentaire.</p>
+                <p><strong>Contact :</strong> support@verifdoc.io</p>
+                <p><strong>Hébergement :</strong> Vercel Inc.</p>
+            </div>
+        </section>
+
+        <!-- 2. CGU -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold text-blue-400 mb-4">2. Conditions Générales d'Utilisation</h2>
+            <div class="prose prose-invert max-w-none text-slate-300 text-sm">
+                <p class="mb-4">
+                    L'utilisation de la plateforme VERIFDOC est réservée à un usage strictement professionnel et
+                    informatif.
+                    Le service fournit une analyse technique basée sur des algorithmes automatisés.
+                </p>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li><strong>Absence de Certification :</strong> Les résultats fournis ne constituent ni une
+                        expertise judiciaire, ni une certification légale, ni une preuve irréfutable. Ils doivent être
+                        considérés uniquement comme une aide à la décision.</li>
+                    <li><strong>Responsabilité :</strong> L'utilisateur reste seul responsable de l'interprétation des
+                        résultats et des décisions prises sur la base de ces analyses. VERIFDOC décline toute
+                        responsabilité en cas d'erreur de faux positif ou faux négatif.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 3. RGPD -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold text-blue-400 mb-4">3. Protection des Données (RGPD)</h2>
+            <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 text-slate-300 text-sm">
+                <p class="mb-4">
+                    <strong>Principe de Minimisation :</strong> VERIFDOC s'engage dans une démarche éthique de
+                    protection de la vie privée.
+                </p>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li><strong>Aucun Stockage Permanent :</strong> Les documents soumis sont traités en mémoire
+                        volatile (RAM) le temps de l'analyse, puis immédiatement purgés. Aucune copie n'est conservée
+                        sur nos serveurs après la fin de la session.</li>
+                    <li><strong>Confidentialité :</strong> Les métadonnées et le contenu des documents ne sont ni
+                        partagés, ni revendus, ni utilisés pour l'entraînement de modèles tiers.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 4. ETHIQUE -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold text-blue-400 mb-4">4. Politique Éthique</h2>
+            <div class="prose prose-invert max-w-none text-slate-300 text-sm">
+                <p>
+                    VERIFDOC conçoit ses algorithmes pour réduire les biais discriminatoires. Nous appliquons un
+                    principe de "Présomption de Validité" (Calibration Conservatrice) pour limiter les faux positifs qui
+                    pourraient porter préjudice aux individus.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="w-full py-8 border-t border-slate-800 text-center text-slate-500 text-xs">
+        <p>&copy; 2025 VERIFDOC. Tous droits réservés. <a href="/" class="hover:text-blue-400">Accueil</a></p>
+    </footer>
+
+</body>
+
+</html>

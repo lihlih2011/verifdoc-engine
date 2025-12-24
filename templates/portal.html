@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VerifDoc | Gestion Dossiers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #0b0f19;
+            color: #e2e8f0;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body class="h-screen flex overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-[#0f1523] border-r border-slate-800 flex flex-col z-20">
+        <div class="h-16 flex items-center px-6 border-b border-slate-800">
+            <div
+                class="w-8 h-8 rounded bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mr-3 shadow-lg shadow-blue-500/20">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <span
+                class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">VerifDoc</span>
+        </div>
+        <nav class="flex-1 py-6 space-y-1">
+            <a href="#" class="flex items-center px-6 py-3 text-white bg-blue-500/10 border-l-2 border-blue-500">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                </svg>
+                Dossiers en cours
+            </a>
+            <a href="#" class="flex items-center px-6 py-3 text-slate-400 hover:text-white transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Dossiers Validés
+            </a>
+            <a href="#" class="flex items-center px-6 py-3 text-slate-400 hover:text-white transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                    </path>
+                </svg>
+                Alertes Fraude (3)
+            </a>
+        </nav>
+        <div class="p-4 border-t border-slate-800">
+            <div class="flex items-center gap-3">
+                <img src="https://ui-avatars.com/api/?name=Banquier+Pro&background=3b82f6&color=fff"
+                    class="w-8 h-8 rounded-full">
+                <div>
+                    <div class="text-sm font-medium text-white">M. Le Banquier</div>
+                    <div class="text-xs text-slate-500">Agence Paris Centre</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 overflow-y-auto">
+        <header class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-bold text-white">Dossiers à traiter (3)</h2>
+            <button
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white text-sm font-medium shadow-lg shadow-blue-600/20 transition-all">
+                + Nouveau Dossier
+            </button>
+        </header>
+
+        <div class="space-y-4">
+            <!-- Dossier 1 -->
+            <div
+                class="glass-panel p-6 rounded-xl flex items-center justify-between hover:bg-slate-800/30 transition-colors group">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-xl font-bold text-slate-400">
+                        MD</div>
+                    <div>
+                        <h3 class="text-white font-medium">Martin DUPONT</h3>
+                        <p class="text-sm text-slate-500">Prêt Immobilier • 350 000 € • Reçu il y a 2h</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-slate-700 text-slate-300">En
+                        attente</span>
+                    <a href="/analysis"
+                        class="px-4 py-2 border border-blue-500/30 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg text-sm font-medium transition-all">
+                        Contrôle VérifDoc &rarr;
+                    </a>
+                </div>
+            </div>
+
+            <!-- Dossier 2 -->
+            <div
+                class="glass-panel p-6 rounded-xl flex items-center justify-between hover:bg-slate-800/30 transition-colors group">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-xl font-bold text-slate-400">
+                        SL</div>
+                    <div>
+                        <h3 class="text-white font-medium">Sophie LEGRAND</h3>
+                        <p class="text-sm text-slate-500">Crédit Conso • 15 000 € • Reçu il y a 4h</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-slate-700 text-slate-300">En
+                        attente</span>
+                    <a href="/analysis"
+                        class="px-4 py-2 border border-blue-500/30 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg text-sm font-medium transition-all">
+                        Contrôle VérifDoc &rarr;
+                    </a>
+                </div>
+            </div>
+
+            <!-- Dossier 3 (The Trap) -->
+            <div
+                class="glass-panel p-6 rounded-xl flex items-center justify-between hover:bg-slate-800/30 transition-colors group border-l-4 border-l-orange-500">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 rounded-full bg-orange-900/20 flex items-center justify-center text-xl font-bold text-orange-500">
+                        JD</div>
+                    <div>
+                        <h3 class="text-white font-medium">Jean DUJARDIN (RISQUE ÉLEVÉ)</h3>
+                        <p class="text-sm text-slate-500">Location LLD • Porsche Cayenne • Reçu à l'instant</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span
+                        class="px-3 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-400">Prioritaire</span>
+                    <a href="/analysis"
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-all shadow-lg shadow-blue-600/20 animate-pulse">
+                        Vérifier MAINTENANT &rarr;
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</body>
+
+</html>

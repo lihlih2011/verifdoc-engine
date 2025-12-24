@@ -1,0 +1,18 @@
+<script>
+async function loadLast() {
+  const res = await fetch("/api/registry/verify");
+  if (!res.ok) return;
+
+  const data = await res.json();
+  const v = document.getElementById("verdict");
+
+  if (data.status === "OK" && data.entries > 0) {
+    v.textContent = "AUTHENTIQUE ✔ (Confiance 100%)";
+    v.className = "ok";
+  } else {
+    v.textContent = "ALTÉRÉ ✖ (Confiance 35%)";
+    v.className = "bad";
+  }
+}
+loadLast();
+</script>

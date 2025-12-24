@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VerifDoc - La Référence de l'Audit Documentaire</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            850: '#151e2e',
+                            900: '#0f172a',
+                            950: '#020617',
+                        },
+                        primary: {
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #020617;
+            color: #f8fafc;
+        }
+
+        /* Subtle Grid Background */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+        }
+
+        .glass-nav {
+            background: rgba(2, 6, 23, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-glow:hover {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-blue-500/30 selection:text-blue-200">
+
+    <div class="fixed inset-0 bg-grid z-[-1] pointer-events-none"></div>
+
+    <!-- NAVIGATION (Boilerplate Style) -->
+    <nav class="fixed w-full z-50 glass-nav transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center gap-2">
+                <div class="bg-white rounded-lg p-1 shadow-lg shadow-blue-500/20">
+                    <img src="/static/img/logo.png" alt="VerifDoc Logo" class="h-16 w-auto">
+                </div>
+            </div>
+
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
+                <a href="#features" class="hover:text-white transition-colors">Produit</a>
+                <a href="#tech" class="hover:text-white transition-colors">Technologie</a>
+                <a href="#pricing" class="hover:text-white transition-colors">Tarifs</a>
+                <a href="/doc" class="hover:text-white transition-colors">Documentation</a>
+            </div>
+
+            <!-- Auth/CTA -->
+            <div class="flex items-center gap-4">
+                <a href="/login" class="text-sm font-medium text-slate-400 hover:text-white hidden sm:block">Log in</a>
+                <a href="/demo"
+                    class="px-5 py-2.5 bg-white text-slate-900 font-semibold rounded-lg text-sm hover:bg-slate-100 transition-all btn-glow">
+                    Get Started
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="pt-40 pb-32 text-center relative overflow-hidden">
+        <!-- Glow Effect behind Hero -->
+        <div
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/20 blur-[120px] rounded-full pointer-events-none z-[-1]">
+        </div>
+
+        <div class="max-w-5xl mx-auto px-6">
+            <div
+                class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700 text-slate-300 text-xs font-medium mb-8">
+                <span class="flex h-2 w-2 rounded-full bg-green-500"></span>
+                v1.0.0 Stable Release
+            </div>
+
+            <h1 class="text-5xl lg:text-7xl font-bold tracking-tight mb-8 leading-[1.1]">
+                The AI-Powered<br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Document Audit
+                    Platform.</span>
+            </h1>
+
+            <p class="text-xl text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+                Stop worrying about forged documents. VerifDoc uses advanced forensic analysis to detect invisible edits
+                in milliseconds.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
+                <a href="/demo"
+                    class="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-blue-500/25">
+                    Start Free Audit
+                </a>
+                <a href="#features"
+                    class="w-full sm:w-auto px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-lg transition-all border border-slate-700">
+                    View Features
+                </a>
+            </div>
+
+
+            <!-- AI Scanning Animation -->
+            <div
+                class="relative rounded-xl border border-slate-800 shadow-2xl bg-slate-900/50 overflow-hidden mx-auto max-w-4xl group">
+                <!-- Header (Fake Window) -->
+                <div class="h-10 bg-slate-900 border-b border-slate-800 flex items-center px-4 gap-2 z-20 relative">
+                    <div class="w-3 h-3 rounded-full bg-red-500/20"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500/20"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500/20"></div>
+                    <div class="ml-4 text-xs font-mono text-slate-500 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                        AI_FORENSIC_KERNEL_V3.1.EXE
+                    </div>
+                </div>
+
+                <!-- Animation Container -->
+                <div class="relative h-[400px] bg-slate-950 flex items-center justify-center overflow-hidden">
+
+
+                    <!-- 1. The Document (Base Layer: Fiche de Paie) -->
+                    <div
+                        class="relative w-[340px] h-[440px] bg-white rounded-sm shadow-2xl overflow-hidden transform transition-transform duration-700 group-hover:scale-105 text-[8px] font-mono text-slate-800 p-6 flex flex-col">
+
+                        <!-- Header -->
+                        <div class="flex justify-between mb-4 pb-2 border-b border-slate-200">
+                            <div>
+                                <div class="font-bold text-lg text-slate-900 mb-1">ENTREPRISE S.A.</div>
+                                <div>12 Rue de la Paix</div>
+                                <div>75000 PARIS</div>
+                                <div>SIRET: 123 456 789 00012</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold">BULLETIN DE PAIE</div>
+                                <div>Période: DEC 2024</div>
+                                <div class="mt-2 font-bold">M. DUPONT Jean</div>
+                                <div>Matricule: 45892</div>
+                            </div>
+                        </div>
+
+                        <!-- Body (Table) -->
+                        <div class="flex-1">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-black">
+                                        <th class="py-1">Libellé</th>
+                                        <th class="py-1 text-right">Base</th>
+                                        <th class="py-1 text-right">Taux</th>
+                                        <th class="py-1 text-right">Montant</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="opacity-80">
+                                    <tr class="border-b border-slate-100">
+                                        <td class="py-1">Salaire de Base</td>
+                                        <td class="text-right">151.67</td>
+                                        <td class="text-right">25.00</td>
+                                        <td class="text-right font-bold">3791.75</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-100">
+                                        <td class="py-1">Prime d'Ancienneté</td>
+                                        <td class="text-right">-</td>
+                                        <td class="text-right">-</td>
+                                        <td class="text-right">379.17</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-100 text-red-600 bg-red-50">
+                                        <td class="py-1">Heures Sup (Modifié)</td>
+                                        <td class="text-right">12.00</td>
+                                        <td class="text-right">31.25</td>
+                                        <td class="text-right font-bold">375.00</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-100">
+                                        <td class="py-1">Santé / Prévoyance</td>
+                                        <td class="text-right">3791.75</td>
+                                        <td class="text-right">2.30</td>
+                                        <td class="text-right">-87.21</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-100">
+                                        <td class="py-1">CSG / CRDS</td>
+                                        <td class="text-right">3900.20</td>
+                                        <td class="text-right">9.70</td>
+                                        <td class="text-right">-378.32</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="border-t-2 border-slate-800 pt-2 mt-2">
+                            <div class="flex justify-between items-end">
+                                <div>
+                                    <div class="text-slate-500">Cumul Imposable: 42 000.00</div>
+                                    <div class="text-slate-500">Congés Payés: 2.08</div>
+                                </div>
+                                <div class="bg-slate-100 px-4 py-2 rounded text-right border border-slate-200">
+                                    <div class="text-[6px] uppercase tracking-widest mb-1 text-slate-500">Net à Payer
+                                    </div>
+                                    <div class="text-xl font-bold font-sans text-slate-900">3 135,27 €</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Anomalies Overlay -->
+                        <div class="absolute inset-0 z-10 pointer-events-none">
+                            <!-- Anomaly 1: The Hourly Rate Modification -->
+                            <div class="absolute top-[138px] left-[0px] w-full h-[18px] bg-red-500/10 border border-red-500/0 opacity-0 animate-reveal-anomaly"
+                                style="animation-delay: 1.8s; animation-fill-mode: forwards;">
+                                <div
+                                    class="absolute -right-2 top-0 transform translate-x-full bg-red-600 text-white text-[8px] font-bold px-1 rounded shadow-lg">
+                                    PIXEL INCONSISTENCY</div>
+                            </div>
+
+                            <!-- Anomaly 2: The Net Amount -->
+                            <div class="absolute bottom-[35px] right-[20px] w-[90px] h-[35px] border-2 border-red-500/0 opacity-0 animate-reveal-anomaly"
+                                style="animation-delay: 3.2s; animation-fill-mode: forwards;">
+                                <div
+                                    class="absolute -top-4 right-0 bg-red-600 text-white text-[8px] font-bold px-1 rounded shadow-lg">
+                                    MATH_MISMATCH</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. The Laser Scan Line -->
+                    <div
+                        class="absolute top-0 w-full h-1 bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.8)] z-20 animate-scan">
+                    </div>
+
+                    <!-- 4. Grid Overlay (Cyber Effect) -->
+                    <div class="absolute inset-0 bg-[url('/static/img/grid.svg')] opacity-10 pointer-events-none"></div>
+
+                    <!-- 5. HUD Overlay -->
+                    <div
+                        class="absolute top-16 right-16 z-30 font-mono text-xs text-blue-400 space-y-2 hidden md:block">
+                        <div class="flex items-center gap-2">
+                            <span>SCANNING_LAYER_01</span>
+                            <span class="text-green-400">[OK]</span>
+                        </div>
+                        <div class="flex items-center gap-2 opacity-0 animate-fade-in"
+                            style="animation-delay: 1s; animation-fill-mode: forwards;">
+                            <span>PIXEL_GRID_ANALYSIS</span>
+                            <span class="text-yellow-400 animate-pulse">...</span>
+                        </div>
+                        <div class="flex items-center gap-2 opacity-0 animate-fade-in"
+                            style="animation-delay: 2s; animation-fill-mode: forwards;">
+                            <span>METADATA_INTEGRITY</span>
+                            <span class="text-red-500">[FAIL]</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <style>
+                @keyframes scan {
+                    0% {
+                        top: 0%;
+                        opacity: 0;
+                    }
+
+                    10% {
+                        opacity: 1;
+                    }
+
+                    50% {
+                        top: 100%;
+                        opacity: 1;
+                    }
+
+                    90% {
+                        opacity: 1;
+                    }
+
+                    100% {
+                        top: 100%;
+                        opacity: 0;
+                    }
+                }
+
+                @keyframes reveal-anomaly {
+                    0% {
+                        opacity: 0;
+                        border-color: rgba(239, 68, 68, 0);
+                    }
+
+                    100% {
+                        opacity: 1;
+                        border-color: rgba(239, 68, 68, 1);
+                        background-color: rgba(239, 68, 68, 0.1);
+                    }
+                }
+
+                @keyframes fade-in {
+                    0% {
+                        opacity: 0;
+                        transform: translateX(10px);
+                    }
+
+                    100% {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+
+                .animate-scan {
+                    animation: scan 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+                }
+
+                .animate-reveal-anomaly {
+                    animation: reveal-anomaly 0.5s ease-out forwards;
+                    /* Triggered via delay matching the scan line position */
+                }
+
+                .animate-fade-in {
+                    animation: fade-in 0.5s ease-out forwards;
+                }
+            </style>
+
+
+            <!-- Trusted By -->
+            <div class="mt-20">
+                <p class="text-sm font-medium text-slate-500 mb-6 uppercase tracking-wider">Trusted by security teams at
+                </p>
+                <div class="flex flex-wrap justify-center gap-10 opacity-50 grayscale transition-all hover:grayscale-0">
+                    <!-- Fake Logo Placeholders -->
+                    <span class="text-xl font-bold text-white">ACME Corp</span>
+                    <span class="text-xl font-bold text-white">GlobalBank</span>
+                    <span class="text-xl font-bold text-white">TechFlow</span>
+                    <span class="text-xl font-bold text-white">SecureNet</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TECHNOLOGY STACK (The "Boilerplate" Flex) -->
+    <section id="tech" class="py-24 border-t border-slate-900 bg-slate-900/20">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold mb-12">Built with Modern Tech Stack</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div
+                    class="p-6 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/50 transition-colors">
+                    <div class="text-yellow-400 font-bold text-xl mb-2">Python</div>
+                    <p class="text-sm text-slate-400">Backend Core</p>
+                </div>
+                <div
+                    class="p-6 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/50 transition-colors">
+                    <div class="text-teal-400 font-bold text-xl mb-2">FastAPI</div>
+                    <p class="text-sm text-slate-400">High Perf. API</p>
+                </div>
+                <div
+                    class="p-6 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/50 transition-colors">
+                    <div class="text-blue-400 font-bold text-xl mb-2">Tailwind</div>
+                    <p class="text-sm text-slate-400">Utility-First CSS</p>
+                </div>
+                <div
+                    class="p-6 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/50 transition-colors">
+                    <div class="text-purple-400 font-bold text-xl mb-2">AI / ML</div>
+                    <p class="text-sm text-slate-400">Forensic Engine</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="pricing" class="py-32 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold mb-4">Simple, transparent pricing</h2>
+                <p class="text-slate-400">Choose the plan that's right for your business.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Starter -->
+                <div class="p-8 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition">
+                    <h3 class="font-bold text-lg text-white mb-2">Starter</h3>
+                    <div class="text-4xl font-bold text-white mb-6">$0<span
+                            class="text-lg text-slate-500 font-normal">/mo</span></div>
+                    <ul class="space-y-4 text-sm text-slate-400 mb-8">
+                        <li class="flex gap-2"><span class="text-blue-500">✓</span> 5 Audits per day</li>
+                        <li class="flex gap-2"><span class="text-blue-500">✓</span> Standard Report</li>
+                        <li class="flex gap-2"><span class="text-blue-500">✓</span> Community Support</li>
+                    </ul>
+                    <a href="/demo"
+                        class="block w-full py-3 px-4 rounded-lg border border-slate-700 text-center font-medium hover:bg-slate-800 hover:text-white transition">Get
+                        Started</a>
+                </div>
+
+                <!-- Pro (Highlight) -->
+                <div
+                    class="p-8 rounded-2xl bg-slate-800 border border-blue-500/50 relative transform md:-translate-y-4 shadow-2xl shadow-blue-900/20">
+                    <div class="absolute top-0 right-0 p-3">
+                        <span class="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">POPULAR</span>
+                    </div>
+                    <h3 class="font-bold text-lg text-white mb-2">Professional</h3>
+                    <div class="text-4xl font-bold text-white mb-6">$49<span
+                            class="text-lg text-slate-500 font-normal">/mo</span></div>
+                    <ul class="space-y-4 text-sm text-slate-300 mb-8">
+                        <li class="flex gap-2"><span class="text-blue-500">✓</span> Unlimited Audits</li>
+                        <li class="flex gap-2"><span class="text-blue-500">✓</span> Detailed Forensic Report</li>
+                        <li class="flex gap-2"><span class="text-blue-500">✓</span> API Access</li>
+                        <li class="flex gap-2"><span class="text-blue-500">✓</span> Priority Support</li>
+                    </ul>
+                    <a href="#"
+                        class="block w-full py-3 px-4 rounded-lg bg-blue-600 text-white text-center font-semibold hover:bg-blue-500 transition shadow-lg">Start
+                        Free Trial</a>
+                </div>
+
+                <!-- Enterprise -->
+                <div class="p-8 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition">
+                    <h3 class="font-bold text-lg text-white mb-2">Enterprise</h3>
+                    <div class="text-4xl font-bold text-white mb-6">Custom</div>
+                    <ul class="space-y-4 text-sm text-slate-400 mb-8">
+                        <li class="flex gap-2"><span class="text-blue-500">✓</span> On-premise Deployment</li>
+                        <li class="flex gap-2"><span class="text-blue-500">✓</span> Custom SLA</li>
+                        <li class="flex gap-2"><span class="text-blue-500">✓</span> Dedicated Manager</li>
+                    </ul>
+                    <a href="mailto:sales@verifdoc.com"
+                        class="block w-full py-3 px-4 rounded-lg border border-slate-700 text-center font-medium hover:bg-slate-800 hover:text-white transition">Contact
+                        Sales</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ (Accordion) -->
+    <section class="py-24 border-t border-slate-900 relative">
+        <div class="max-w-3xl mx-auto px-6">
+            <h2 class="text-3xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
+
+            <div class="space-y-4" x-data="{ active: null }">
+                <div class="bg-slate-900/50 rounded-lg p-6 cursor-pointer hover:bg-slate-900 transition"
+                    @click="active = (active === 1 ? null : 1)">
+                    <div class="flex justify-between items-center font-semibold text-lg">
+                        Is my data secure?
+                        <span x-text="active === 1 ? '-' : '+'" class="text-slate-500"></span>
+                    </div>
+                    <p x-show="active === 1" class="mt-4 text-slate-400 text-sm leading-relaxed" x-transition>
+                        Yes. We process files in volatile memory (RAM) only. No documents are stored on our servers
+                        after the analysis session is closed.
+                    </p>
+                </div>
+
+                <div class="bg-slate-900/50 rounded-lg p-6 cursor-pointer hover:bg-slate-900 transition"
+                    @click="active = (active === 2 ? null : 2)">
+                    <div class="flex justify-between items-center font-semibold text-lg">
+                        Can I integrate via API?
+                        <span x-text="active === 2 ? '-' : '+'" class="text-slate-500"></span>
+                    </div>
+                    <p x-show="active === 2" class="mt-4 text-slate-400 text-sm leading-relaxed" x-transition>
+                        Absolutely. The Professional plan includes full API access with Swagger documentation.
+                        Compatible with any Python/Node/Go stack.
+                    </p>
+                </div>
+
+                <div class="bg-slate-900/50 rounded-lg p-6 cursor-pointer hover:bg-slate-900 transition"
+                    @click="active = (active === 3 ? null : 3)">
+                    <div class="flex justify-between items-center font-semibold text-lg">
+                        What tech stack is this?
+                        <span x-text="active === 3 ? '-' : '+'" class="text-slate-500"></span>
+                    </div>
+                    <p x-show="active === 3" class="mt-4 text-slate-400 text-sm leading-relaxed" x-transition>
+                        VerifDoc is built on Python 3.11, FastAPI, and Tailwind CSS. It uses proprietary forensic
+                        algorithms for document analysis.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 border-t border-slate-900 py-16">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-5 gap-12 text-sm text-slate-400">
+            <div class="md:col-span-2">
+                <div class="flex items-center gap-2 mb-6">
+                    <img src="/static/img/logo.png" alt="VerifDoc Logo" class="h-8 w-auto">
+                </div>
+                <p class="mb-6 max-w-xs">
+                    The standard for document integrity verification. Built for speed, privacy, and accuracy.
+                </p>
+                <div class="flex gap-4">
+                    <a href="#"
+                        class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-slate-700">𝕏</a>
+                    <a href="#"
+                        class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-slate-700">in</a>
+                    <a href="#"
+                        class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-slate-700">GH</a>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-white mb-4">Product</h4>
+                <ul class="space-y-2">
+                    <li><a href="#features" class="hover:text-blue-500">Features</a></li>
+                    <li><a href="#pricing" class="hover:text-blue-500">Pricing</a></li>
+                    <li><a href="#" class="hover:text-blue-500">API</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-white mb-4">Resources</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:text-blue-500">Documentation</a></li>
+                    <li><a href="#" class="hover:text-blue-500">Guides</a></li>
+                    <li><a href="#" class="hover:text-blue-500">Status</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-white mb-4">Company</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:text-blue-500">About</a></li>
+                    <li><a href="#" class="hover:text-blue-500">Blog</a></li>
+                    <li><a href="/legal" class="hover:text-blue-500">Legal</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-slate-900 flex justify-between">
+            <span>© 2025 VerifDoc Inc.</span>
+            <span>Paris, France</span>
+        </div>
+    </footer>
+
+</body>
+
+</html>

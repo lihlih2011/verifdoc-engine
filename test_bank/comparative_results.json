@@ -1,0 +1,259 @@
+{
+  "real": [
+    {
+      "file": "orange_bill.pdf",
+      "sector": "real",
+      "category": "real",
+      "score": 90,
+      "verdict": "FRAUDULENT",
+      "evidence_count": 3,
+      "evidence": [
+        "METADATA_PRODUCER_MISSING",
+        "DOCUMENT_CONTENT_EMPTY/UNREADABLE",
+        "METADATA_PRODUCER_MISSING"
+      ]
+    },
+    {
+      "file": "synthetic_rib_001.pdf",
+      "sector": "banking",
+      "category": "real",
+      "score": 60,
+      "verdict": "FRAUDULENT",
+      "evidence_count": 2,
+      "evidence": [
+        "PRODUCER_NON_STANDARD_REPORTLAB PDF LIBRARY - (OPENSOURCE)",
+        "IBAN_INVALID"
+      ]
+    },
+    {
+      "file": "synthetic_payslip_001.pdf",
+      "sector": "employment",
+      "category": "real",
+      "score": 10,
+      "verdict": "VALID",
+      "evidence_count": 1,
+      "evidence": [
+        "PRODUCER_NON_STANDARD_REPORTLAB PDF LIBRARY - (OPENSOURCE)"
+      ]
+    },
+    {
+      "file": "free_bill.pdf",
+      "sector": "utilities",
+      "category": "real",
+      "score": 90,
+      "verdict": "FRAUDULENT",
+      "evidence_count": 3,
+      "evidence": [
+        "METADATA_PRODUCER_MISSING",
+        "DOCUMENT_CONTENT_EMPTY/UNREADABLE",
+        "METADATA_PRODUCER_MISSING"
+      ]
+    },
+    {
+      "file": "orange_bill.pdf",
+      "sector": "utilities",
+      "category": "real",
+      "score": 90,
+      "verdict": "FRAUDULENT",
+      "evidence_count": 3,
+      "evidence": [
+        "METADATA_PRODUCER_MISSING",
+        "DOCUMENT_CONTENT_EMPTY/UNREADABLE",
+        "METADATA_PRODUCER_MISSING"
+      ]
+    },
+    {
+      "file": "synthetic_invoice_edf_001.pdf",
+      "sector": "utilities",
+      "category": "real",
+      "score": 10,
+      "verdict": "VALID",
+      "evidence_count": 1,
+      "evidence": [
+        "PRODUCER_NON_STANDARD_REPORTLAB PDF LIBRARY - (OPENSOURCE)"
+      ]
+    }
+  ],
+  "faked": [
+    {
+      "file": "synthetic_rib_001_COMBO_FRAUD.pdf",
+      "sector": "banking",
+      "category": "faked",
+      "score": 60,
+      "verdict": "FRAUDULENT",
+      "evidence_count": 2,
+      "evidence": [
+        "PRODUCER_NON_STANDARD_PIKEPDF 10.0.3",
+        "IBAN_INVALID"
+      ]
+    },
+    {
+      "file": "synthetic_rib_001_ELA_FAIL.pdf",
+      "sector": "banking",
+      "category": "faked",
+      "score": 60,
+      "verdict": "FRAUDULENT",
+      "evidence_count": 2,
+      "evidence": [
+        "PRODUCER_NON_STANDARD_REPORTLAB PDF LIBRARY - (OPENSOURCE)",
+        "IBAN_INVALID"
+      ]
+    },
+    {
+      "file": "synthetic_rib_001_META_CORRUPT.pdf",
+      "sector": "banking",
+      "category": "faked",
+      "score": 60,
+      "verdict": "FRAUDULENT",
+      "evidence_count": 2,
+      "evidence": [
+        "PRODUCER_NON_STANDARD_PIKEPDF 10.0.3",
+        "IBAN_INVALID"
+      ]
+    },
+    {
+      "file": "synthetic_payslip_001_COMBO_FRAUD.pdf",
+      "sector": "employment",
+      "category": "faked",
+      "score": 10,
+      "verdict": "VALID",
+      "evidence_count": 1,
+      "evidence": [
+        "PRODUCER_NON_STANDARD_PIKEPDF 10.0.3"
+      ]
+    },
+    {
+      "file": "synthetic_payslip_001_ELA_FAIL.pdf",
+      "sector": "employment",
+      "category": "faked",
+      "score": 10,
+      "verdict": "VALID",
+      "evidence_count": 1,
+      "evidence": [
+        "PRODUCER_NON_STANDARD_REPORTLAB PDF LIBRARY - (OPENSOURCE)"
+      ]
+    },
+    {
+      "file": "synthetic_payslip_001_META_CORRUPT.pdf",
+      "sector": "employment",
+      "category": "faked",
+      "score": 10,
+      "verdict": "VALID",
+      "evidence_count": 1,
+      "evidence": [
+        "PRODUCER_NON_STANDARD_PIKEPDF 10.0.3"
+      ]
+    },
+    {
+      "file": "free_bill_COMBO_FRAUD.pdf",
+      "sector": "utilities",
+      "category": "faked",
+      "score": 90,
+      "verdict": "FRAUDULENT",
+      "evidence_count": 3,
+      "evidence": [
+        "METADATA_PRODUCER_MISSING",
+        "DOCUMENT_CONTENT_EMPTY/UNREADABLE",
+        "METADATA_PRODUCER_MISSING"
+      ]
+    },
+    {
+      "file": "free_bill_ELA_FAIL.pdf",
+      "sector": "utilities",
+      "category": "faked",
+      "score": 90,
+      "verdict": "FRAUDULENT",
+      "evidence_count": 3,
+      "evidence": [
+        "METADATA_PRODUCER_MISSING",
+        "DOCUMENT_CONTENT_EMPTY/UNREADABLE",
+        "METADATA_PRODUCER_MISSING"
+      ]
+    },
+    {
+      "file": "free_bill_META_CORRUPT.pdf",
+      "sector": "utilities",
+      "category": "faked",
+      "score": 90,
+      "verdict": "FRAUDULENT",
+      "evidence_count": 3,
+      "evidence": [
+        "METADATA_PRODUCER_MISSING",
+        "DOCUMENT_CONTENT_EMPTY/UNREADABLE",
+        "METADATA_PRODUCER_MISSING"
+      ]
+    },
+    {
+      "file": "orange_bill_COMBO_FRAUD.pdf",
+      "sector": "utilities",
+      "category": "faked",
+      "score": 90,
+      "verdict": "FRAUDULENT",
+      "evidence_count": 3,
+      "evidence": [
+        "METADATA_PRODUCER_MISSING",
+        "DOCUMENT_CONTENT_EMPTY/UNREADABLE",
+        "METADATA_PRODUCER_MISSING"
+      ]
+    },
+    {
+      "file": "orange_bill_ELA_FAIL.pdf",
+      "sector": "utilities",
+      "category": "faked",
+      "score": 90,
+      "verdict": "FRAUDULENT",
+      "evidence_count": 3,
+      "evidence": [
+        "METADATA_PRODUCER_MISSING",
+        "DOCUMENT_CONTENT_EMPTY/UNREADABLE",
+        "METADATA_PRODUCER_MISSING"
+      ]
+    },
+    {
+      "file": "orange_bill_META_CORRUPT.pdf",
+      "sector": "utilities",
+      "category": "faked",
+      "score": 90,
+      "verdict": "FRAUDULENT",
+      "evidence_count": 3,
+      "evidence": [
+        "METADATA_PRODUCER_MISSING",
+        "DOCUMENT_CONTENT_EMPTY/UNREADABLE",
+        "METADATA_PRODUCER_MISSING"
+      ]
+    },
+    {
+      "file": "synthetic_invoice_edf_001_COMBO_FRAUD.pdf",
+      "sector": "utilities",
+      "category": "faked",
+      "score": 10,
+      "verdict": "VALID",
+      "evidence_count": 1,
+      "evidence": [
+        "PRODUCER_NON_STANDARD_PIKEPDF 10.0.3"
+      ]
+    },
+    {
+      "file": "synthetic_invoice_edf_001_ELA_FAIL.pdf",
+      "sector": "utilities",
+      "category": "faked",
+      "score": 10,
+      "verdict": "VALID",
+      "evidence_count": 1,
+      "evidence": [
+        "PRODUCER_NON_STANDARD_REPORTLAB PDF LIBRARY - (OPENSOURCE)"
+      ]
+    },
+    {
+      "file": "synthetic_invoice_edf_001_META_CORRUPT.pdf",
+      "sector": "utilities",
+      "category": "faked",
+      "score": 10,
+      "verdict": "VALID",
+      "evidence_count": 1,
+      "evidence": [
+        "PRODUCER_NON_STANDARD_PIKEPDF 10.0.3"
+      ]
+    }
+  ]
+}

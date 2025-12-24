@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VerifDoc | Forensic Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .hero-bg {
+            background-color: #020617;
+            background-image:
+                radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 100%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar {
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, transparent 100%);
+            border-left: 3px solid #3b82f6;
+            color: #60a5fa;
+        }
+
+        .score-circle {
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+
+        /* Magnifier Styles */
+        .magnifier {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            cursor: none;
+            pointer-events: none;
+            z-index: 50;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 0, 0, 0.5);
+            background-color: #000;
+        }
+
+        .magnifier::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+    </style>
+</head>
+
+<body class="h-screen flex overflow-hidden hero-bg text-slate-300 selection:bg-blue-500/30" x-data="app()"
+    @external-files.window="processFiles($event.detail)"
+    @analysis-complete.window="handleAnalysisResults($event.detail)">
+
+    <!-- Native Loader -->
+    <div id="native-loader" style="display: none;"
+        class="fixed inset-0 z-[100] bg-slate-950/90 flex flex-col items-center justify-center backdrop-blur-xl">
+        <div class="relative w-24 h-24 mb-8">
+            <div class="absolute inset-0 border-t-4 border-blue-500 rounded-full animate-spin"></div>
+            <div class="absolute inset-2 border-r-4 border-purple-500 rounded-full animate-spin reverse"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+            </div>
+        </div>
+        <h2 class="text-2xl font-bold text-white tracking-widest">ANALYZING</h2>
+        <p class="text-blue-400 font-mono text-xs mt-2 uppercase">Secure Forensic Pipeline v2.0</p>
+    </div>
+
+    <!-- APP CONTAINER -->
+    <main x-data="app()" class="relative min-h-screen z-10 p-6 flex flex-col items-center justify-center">
+
+        <!-- LICENSE SELECTOR MODAL -->
+        <div x-show="state === 'choosing_license'" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-xl" x-transition.opacity>
+            <div class="max-w-4xl w-full p-8">
+                <div class="text-center mb-12">
+                     <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-600/20 text-blue-400 mb-6 border border-blue-500/30 shadow-[0_0_30px_rgba(37,99,235,0.3)]">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    </div>
+                    <h1 class="text-4xl font-black text-white tracking-tight mb-4">VERIFDOC <span class="text-blue-500">SECTORIEL</span></h1>
+                    <p class="text-slate-400 text-lg max-w-2xl mx-auto">Veuillez sélectionner votre licence sectorielle pour activer le référentiel d'analyse adapté.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- RH -->
+                    <button @click="selectSector('RH')" class="group relative p-6 rounded-2xl bg-slate-900 border border-slate-700 hover:border-blue-500 hover:bg-slate-800 transition-all text-left">
+                        <div class="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"></div>
+                        <div class="text-white font-bold text-lg mb-2 flex items-center gap-2">
+                             <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                             RH & Recrutement
+                        </div>
+                        <p class="text-xs text-slate-500 mb-4">Analyse de CVs et Diplômes. Tolérance "Word" élevée. Contexte éducatif.</p>
+                        <span class="inline-flex items-center px-2 py-1 rounded bg-blue-500/10 text-blue-400 text-[10px] font-mono border border-blue-500/20">PROFIL SOUPLE</span>
+                    </button>
+
+                    <!-- IMMOBILIER -->
+                     <button @click="selectSector('IMMOBILIER')" class="group relative p-6 rounded-2xl bg-slate-900 border border-slate-700 hover:border-orange-500 hover:bg-slate-800 transition-all text-left">
+                        <div class="absolute inset-0 bg-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"></div>
+                        <div class="text-white font-bold text-lg mb-2 flex items-center gap-2">
+                             <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                             Immo & Location
+                        </div>
+                        <p class="text-xs text-slate-500 mb-4">Dossiers Locatifs. Focus revenus et identité. Détection stricte des modifications chiffres.</p>
+                         <span class="inline-flex items-center px-2 py-1 rounded bg-orange-500/10 text-orange-400 text-[10px] font-mono border border-orange-500/20">PROFIL STRICT</span>
+                    </button>
+
+                    <!-- ASSURANCE / JURIDIQUE -->
+                     <button @click="selectSector('ASSURANCE')" class="group relative p-6 rounded-2xl bg-slate-900 border border-slate-700 hover:border-red-500 hover:bg-slate-800 transition-all text-left">
+                         <div class="absolute inset-0 bg-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"></div>
+                        <div class="text-white font-bold text-lg mb-2 flex items-center gap-2">
+                             <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                             Assurance & Conformité
+                        </div>
+                        <p class="text-xs text-slate-500 mb-4">Sinistres et KYC. Tolérance zéro. Analyse forensique maximale.</p>
+                         <span class="inline-flex items-center px-2 py-1 rounded bg-red-500/10 text-red-500 text-[10px] font-mono border border-red-500/20">TOLÉRANCE ZÉRO</span>
+                    </button>
+                    
+                     <!-- GENERIC -->
+                     <button @click="selectSector('GENERIC')" class="group relative p-6 rounded-2xl bg-slate-900 border border-slate-700 hover:border-slate-500 hover:bg-slate-800 transition-all text-left">
+                        <div class="text-white font-bold text-lg mb-2 flex items-center gap-2">
+                             <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                             Audit Général
+                        </div>
+                        <p class="text-xs text-slate-500 mb-4">Analyse technique standard sans contexte métier spécifique.</p>
+                    </button>
+                </div>
+                
+                <div class="mt-12 pt-8 border-t border-slate-800 text-center">
+                    <p class="text-xs text-slate-600 uppercase tracking-widest font-mono">Système d'Aide à la Décision Certifié - v2.4 (Sectoriel)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-6xl w-full mx-auto" x-show="state !== 'choosing_license'">
+        
+            <!-- Top Bar with Active License -->
+            <div class="flex justify-between items-center mb-8">
+                 <div class="flex items-center gap-4">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/768px-Google_%22G%22_logo.svg.png" 
+                         class="h-8 w-8 opacity-80" alt="Logo">
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500">
+                        VERIFDOC <span class="text-xs font-mono text-slate-500 px-2 py-0.5 rounded border border-slate-700 ml-2" x-text="sectorName"></span>
+                    </h1>
+                </div>
+                 <button @click="state = 'choosing_license'" class="text-xs text-slate-500 hover:text-white underline">Changer de Licence</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Sidebar -->
+    <aside class="w-72 sidebar flex flex-col z-20 hidden md:flex">
+        <div class="h-20 flex items-center px-8 border-b border-white/5">
+            <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center mr-3 shadow-lg shadow-blue-500/20">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div>
+                <span class="text-lg font-bold text-white tracking-tight block">VerifDoc</span>
+                <span class="text-[10px] text-blue-400 font-mono uppercase tracking-widest">Enterprise</span>
+            </div>
+        </div>
+
+        <nav class="flex-1 py-8 space-y-2 px-4">
+            <a href="#"
+                class="nav-item active flex items-center px-4 py-3.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all group">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                    </path>
+                </svg>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            <a href="#" @click.prevent="resetAnalysis()"
+                class="nav-item flex items-center px-4 py-3.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all group">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="font-medium">Nouvelle Analyse</span>
+            </a>
+            <a href="/report/latest" target="_blank"
+                class="nav-item flex items-center px-4 py-3.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all group">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                    </path>
+                </svg>
+                <span class="font-medium">Dernier Rapport</span>
+            </a>
+        </nav>
+
+        <div class="p-6 border-t border-white/5">
+            <div class="glass-panel p-4 rounded-2xl flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 p-0.5">
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=0f172a&color=fff"
+                        class="w-full h-full rounded-full object-cover border-2 border-slate-900">
+                </div>
+                <div>
+                    <div class="text-sm font-bold text-white">Admin User</div>
+                    <div class="text-xs text-green-400 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                        Connecté
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col relative overflow-y-auto">
+
+        <!-- Top Bar -->
+        <header
+            class="h-20 flex items-center justify-between px-8 sticky top-0 z-10 bg-slate-950/80 backdrop-blur border-b border-white/5">
+            <h2 class="text-xl font-bold text-white tracking-tight">Audit Documentaire</h2>
+            <div class="flex items-center gap-4">
+                <div
+                    class="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold font-mono">
+                    ENGINE V3.1 ACTIVE
+                </div>
+            </div>
+        </header>
+
+        <div class="p-8 max-w-7xl mx-auto w-full space-y-8 pb-32">
+
+            <!-- UPLOAD ZONE (IDLE STATE) -->
+            <div id="upload-zone" :class="state === 'idle' ? 'flex' : 'hidden'"
+                class="border-[1px] border-dashed border-slate-700 rounded-3xl bg-slate-900/40 hover:bg-slate-800/60 hover:border-blue-500/50 transition-all cursor-pointer h-[500px] flex-col items-center justify-center relative group backdrop-blur-sm"
+                onclick="document.getElementById('hidden-file-input').click()">
+
+                <input type="file" id="hidden-file-input" class="hidden" accept=".pdf,.jpg,.jpeg,.png" multiple
+                    x-on:change="processFiles($event.target.files)">
+
+                <div class="relative w-32 h-32 mb-8 group-hover:scale-110 transition-transform duration-500">
+                    <div
+                        class="absolute inset-0 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-500/30 transition-all">
+                    </div>
+                    <div
+                        class="relative w-full h-full bg-slate-800 rounded-full border border-slate-700 flex items-center justify-center shadow-2xl">
+                        <svg class="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <h3 class="text-3xl font-bold text-white mb-3">Déposez vos dossiers</h3>
+                <p class="text-slate-400 mb-8 text-lg">PDF, JPEG, PNG • Analyse en lot supportée</p>
+
+                <div class="flex gap-4">
+                    <div
+                        class="px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-xs font-mono text-slate-400">
+                        SCAN ELA
+                    </div>
+                    <div
+                        class="px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-xs font-mono text-slate-400">
+                        METADATA
+                    </div>
+                    <div
+                        class="px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-xs font-mono text-slate-400">
+                        OCR
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANALYZING STATE -->
+            <div x-show="state === 'analyzing'" class="flex flex-col items-center justify-center h-[500px]" x-cloak>
+                <!-- Animation handled by Native Loader mostly, keeping this simple -->
+                <p class="text-slate-400 animate-pulse">Finalisation du rapport...</p>
+            </div>
+
+            <!-- RESULTATS -->
+            <div x-show="state === 'done'" class="space-y-8" x-cloak>
+
+                <!-- CAT C: REFUSAL INTERSTITIAL (Replaces Dashboard) -->
+                <template x-if="currentReport && currentReport.verdict === 'REFUSED'">
+                    <div
+                        class="flex flex-col items-center justify-center min-h-[400px] text-center max-w-2xl mx-auto space-y-6">
+                        <div
+                            class="w-24 h-24 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center mb-4 shadow-2xl">
+                            <svg class="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636">
+                                </path>
+                            </svg>
+                        </div>
+                        <h2 class="text-3xl font-bold text-slate-200">Non Pris en Charge</h2>
+                        <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 w-full text-left">
+                            <h3 class="text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">AVIS DE
+                                NON-RÉCEPTION</h3>
+                            <p class="text-slate-300 leading-relaxed"
+                                x-text="refusal_reason || 'Le document ne respecte pas les critères minimaux de qualité (Volume texte insuffisant, Illisible ou Hors Périmètre).'">
+                            </p>
+                        </div>
+                        <p class="text-xs text-slate-500 max-w-lg italic">
+                            "Ce refus ne constitue ni une accusation, ni une qualification du document, mais une mesure
+                            de précaution éthique."
+                        </p>
+                        <button @click="reset()"
+                            class="px-8 py-3 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-all font-bold text-sm mt-8">
+                            Retourner à l'accueil
+                        </button>
+                    </div>
+                </template>
+
+                <!-- CAT A & B: STANDARD DASHBOARD -->
+                <template x-if="currentReport && currentReport.verdict !== 'REFUSED'">
+                    <div class="space-y-8">
+
+                        <!-- CAT B: RESERVATION ALERT -->
+                        <template x-if="triage_category === 'B'">
+                            <div
+                                class="bg-orange-500/10 border-l-4 border-orange-500 p-4 rounded-r-xl flex items-start gap-4">
+                                <div class="text-orange-500 mt-1">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-orange-400 font-bold text-sm uppercase">Analyse sous réserve</h3>
+                                    <p class="text-slate-300 text-sm mt-1">
+                                        Le document a été analysé avec réserve, compte tenu de ses caractéristiques
+                                        (qualité, volume). Les résultats ci-dessous sont indicatifs.
+                                    </p>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- 1. HEADER: Score & Verdict -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" x-show="currentReport">
+                            <!-- Score Card -->
+                            <div
+                                class="glass-panel p-8 rounded-3xl relative overflow-hidden flex flex-col items-center justify-center text-center">
+                                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-900/50"></div>
+                                <div class="relative z-10">
+                                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Niveau
+                                        de Risque
+                                    </h3>
+                                    <div class="relative w-40 h-40 mx-auto mb-6">
+                                        <svg class="w-full h-full transform -rotate-90">
+                                            <circle cx="80" cy="80" r="70" stroke="#1e293b" stroke-width="12"
+                                                fill="none">
+                                            </circle>
+                                            <circle cx="80" cy="80" r="70" :stroke="scoreColor" stroke-width="12"
+                                                fill="none" :stroke-dasharray="440"
+                                                :stroke-dashoffset="440 - (440 * score / 100)" stroke-linecap="round"
+                                                class="score-circle">
+                                            </circle>
+                                        </svg>
+                                        <div class="absolute inset-0 flex items-center justify-center flex-col">
+                                            <span class="text-5xl font-black text-white" x-text="score"></span>
+                                            <span class="text-xs font-bold text-slate-500 mt-1">/ 100</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-2xl font-black mb-2" :class="verdictColor" x-text="verdictText">
+                                    </div>
+                                    <p class="text-sm text-slate-400" x-text="evidenceCount + ' anomalies détectées'">
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Scan Context Warning (If Applicable) -->
+                            <template x-if="isScanContext">
+                                <div
+                                    class="glass-panel p-8 rounded-3xl border-l-4 border-l-orange-500 bg-orange-500/5 flex flex-col justify-center">
+                                    <div
+                                        class="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center mb-4 text-orange-400">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-white mb-2">Scan Détecté</h3>
+                                    <p class="text-sm text-slate-300 leading-relaxed">
+                                        Ce document provient d'un matériel d'impression/numérisation (e.g.
+                                        Printer/Scanner).
+                                        Les artefacts de compression sont normaux et ne constituent pas forcément une
+                                        fraude.
+                                    </p>
+                                </div>
+                            </template>
+
+                            <!-- Critical Fraud Alert (If Score > 60) -->
+                            <template x-if="score >= 60">
+                                <div
+                                    class="glass-panel p-8 rounded-3xl border-l-4 border-l-red-500 bg-red-500/5 flex flex-col justify-center lg:col-span-2">
+                                    <div
+                                        class="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center mb-4 text-red-500 animate-pulse">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-white mb-2">Anomalie Critique Confirmée</h3>
+                                    <p class="text-sm text-slate-300 leading-relaxed mb-4">
+                                        Le moteur a détecté des <strong>modifications structurelles majeures</strong>
+                                        incompatibles avec un original natif.
+                                        La probabilité d'altération intentionnelle est très élevée.
+                                    </p>
+                                    <div class="flex gap-4">
+                                        <button @click="showHeatmap = true"
+                                            class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-lg transition-colors shadow-lg shadow-red-500/20">
+                                            VOIR LES ZONES MODIFIÉES
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- 2. EVIDENCE GRID -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6"
+                    x-show="currentReport && currentReport.verdict !== 'REFUSED'">
+
+                    <div class="glass-panel p-6 rounded-3xl">
+                        <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                            <div class="w-1.5 h-6 bg-blue-500 rounded-full"></div>
+                            Marqueurs Techniques
+                        </h3>
+                        <div class="space-y-3">
+                            <template x-for="item in evidence">
+                                <div
+                                    class="p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:border-blue-500/30 transition-all group">
+                                    <div class="flex items-start gap-4">
+                                        <div class="mt-1">
+                                            <template x-if="item.includes('CRITICAL') || item.includes('FRAUD')">
+                                                <div
+                                                    class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]">
+                                                </div>
+                                            </template>
+                                            <template x-if="item.includes('WARNING') || item.includes('SUSPICIOUS')">
+                                                <div
+                                                    class="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)]">
+                                                </div>
+                                            </template>
+                                            <template x-if="item.includes('INFO')">
+                                                <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                            </template>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors"
+                                                x-text="formatEvidence(item)"></div>
+                                            <div class="text-xs text-slate-500 mt-1" x-text="getEvidenceDesc(item)">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            <template x-if="evidence.length === 0">
+                                <div class="text-sm text-green-400 text-center py-4">Aucune anomalie détectée</div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Metadata & Details -->
+                    <div class="space-y-6">
+                        <!-- Metadata Card -->
+                        <div class="glass-panel p-6 rounded-3xl">
+                            <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                                <div class="w-1.5 h-6 bg-purple-500 rounded-full"></div>
+                                Métadonnées
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center p-3 rounded-lg bg-slate-900/30">
+                                    <span class="text-sm text-slate-500">Producteur</span>
+                                    <span class="text-sm font-mono text-white"
+                                        x-text="metadata.producer || 'N/A'"></span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 rounded-lg bg-slate-900/30">
+                                    <span class="text-sm text-slate-500">Modification</span>
+                                    <span class="text-sm font-mono text-white"
+                                        x-text="metadata.mod_date || 'N/A'"></span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 rounded-lg bg-slate-900/30">
+                                    <span class="text-sm text-slate-500">Taille Texte</span>
+                                    <span class="text-sm font-mono text-white"
+                                        x-text="(stats.text_length || 0) + ' chars'"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MRZ Card (Conditional) -->
+                        <div class="glass-panel p-6 rounded-3xl border border-blue-500/20 relative overflow-hidden"
+                            x-show="mrz.found">
+                            <div class="absolute top-0 right-0 p-4 opacity-20">
+                                <svg class="w-16 h-16 text-blue-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <div class="w-1.5 h-6 bg-blue-500 rounded-full"></div>
+                                Identité (MRZ)
+                            </h3>
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="px-3 py-1 bg-slate-900 rounded text-xs font-mono text-blue-400 border border-blue-500/30"
+                                    x-text="mrz.type"></div>
+                                <div class="px-3 py-1 rounded text-xs font-bold"
+                                    :class="mrz.valid_checksums ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'"
+                                    x-text="mrz.valid_checksums ? 'VALID' : 'INVALID'"></div>
+                            </div>
+                            <div
+                                class="p-3 bg-slate-950 rounded-lg border border-slate-800 font-mono text-[10px] text-slate-400 tracking-widest break-all">
+                                <template x-for="line in mrz.raw_lines">
+                                    <div x-text="line"></div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. ACTIONS -->
+                <div class="flex justify-center gap-6 pt-8 pb-12">
+                    <button @click="reset()"
+                        class="px-8 py-3 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-all font-bold text-sm">
+                        Nouvelle Analyse
+                    </button>
+                    <a href="/report/latest" target="_blank"
+                        class="px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/25 transition-all transform hover:-translate-y-1 font-bold text-sm flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Télécharger le Certificat
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- JS LOGIC - PRESERVED EXACTLY AS IS -->
+    <script>
+        // Global Error Handler to catch unhandled errors
+        window.onerror = function (message, source, lineno, colno, error) {
+            console.error(message, source, lineno);
+            return false;
+        };
+
+        // GLOBAL HANDLER: robust native upload (Bypassing Alpine for the trigger)
+        window.handleFilesGlobal = function (files, sector = 'GENERIC') {
+            console.log("Global Handler Triggered", files, "Sector:", sector);
+            if (!files || files.length === 0) return;
+
+            // 1. Show Native Loader immediately
+            const loader = document.getElementById('native-loader');
+            if (loader) loader.style.display = 'flex';
+
+            // 2. Build FormData
+            const formData = new FormData();
+            formData.append('sector', sector); // Send Sector Context
+            Array.from(files).forEach(file => {
+                formData.append('files', file);
+            });
+
+            // 3. Perform Fetch
+            fetch('/api/v1/batch-analyze', { method: 'POST', body: formData })
+                .then(res => {
+                    if (!res.ok) throw new Error("HTTP " + res.status);
+                    return res.json();
+                })
+                .then(data => {
+                    console.log("Analysis Success:", data);
+
+                    // 4. Dispatch Results Event (Safe Alpine Update)
+                    // We attach the object URL for preview here to keep logic clean
+                    let processedData = data;
+                    if (data.individual_reports && Array.isArray(data.individual_reports)) {
+                        processedData.individual_reports = data.individual_reports.map((report, idx) => {
+                            report.previewUrl = URL.createObjectURL(files[idx]);
+                            return report;
+                        });
+                    } else {
+                        // Setup single report structure to match expectation
+                        processedData.individual_reports = [{
+                            ...data,
+                            previewUrl: URL.createObjectURL(files[0]),
+                            filename: files[0].name
+                        }];
+                        processedData.batch_logic = null;
+                    }
+
+                    window.dispatchEvent(new CustomEvent('analysis-complete', { detail: processedData }));
+                })
+                .catch(err => {
+                    console.error("Upload Error:", err);
+                    alert("Erreur d'analyse : " + err.message);
+                })
+                .finally(() => {
+                    // 5. Hide Loader
+                    if (loader) loader.style.display = 'none';
+                });
+        };
+
+        function app() {
+            return {
+                // App State
+                state: 'choosing_license', // idle, analyzing, done, choosing_license
+                fileCount: 0,
+                reports: [],
+                batchLogic: null,
+                selectedDocIndex: 0,
+
+                // Sectorization
+                sector: null,
+                sectorLabels: {
+                    'RH': 'Ressources Humaines & Recrutement',
+                    'IMMOBILIER': 'Immobilier & Location',
+                    'ASSURANCE': 'Assurance & Sinistres',
+                    'JURIDIQUE': 'Juridique & Conformité',
+                    'BANQUE': 'Banque & Crédit',
+                    'EDUCATION': 'Enseignement & Université',
+                    'GENERIC': 'Audit Général (Standard)'
+                },
+
+                // Magnifier State
+                showHeatmap: false,
+                showMagnifier: false,
+                magnifierStyle: '',
+                isLoupeActive: false,
+
+                init() {
+                    console.log("VerifDoc App Initialized");
+                    // Force license selection on start
+                    this.state = 'choosing_license';
+                },
+
+                selectSector(code) {
+                    this.sector = code;
+                    this.state = 'idle';
+                    console.log("Sector Selected:", code);
+                },
+
+                get currentReport() {
+                    // SAFE GETTER
+                    return (this.reports && this.reports[this.selectedDocIndex]) || null;
+                },
+
+                get sectorName() {
+                    return this.sectorLabels[this.sector] || 'Audit Général';
+                },
+
+                // Getters for current report shorthand
+                get details() { return this.currentReport && this.currentReport.details ? this.currentReport.details : {}; },
+                get evidenceCount() { return this.evidence ? this.evidence.length : 0; },
+
+                get score() { return this.currentReport ? (this.currentReport.score || 0) : 0; },
+                get evidence() { return this.currentReport ? (this.currentReport.evidence || []) : []; },
+                get hypotheses() { return this.currentReport ? (this.currentReport.hypotheses || []) : []; },
+
+                // Secure Nested Getters (Prevent "undefined" crash)
+                get metadata() {
+                    try { return this.details.structure.metadata || {}; } catch (e) { return {}; }
+                },
+                get stats() {
+                    try { return this.details.stats || {}; } catch (e) { return {}; }
+                },
+                get forensic() {
+                    try { return this.details.forensic || {}; } catch (e) { return {}; }
+                },
+                get logic() {
+                    try { return this.details.logic.business || {}; } catch (e) { return {}; }
+                },
+                get mrz() {
+                    try { return this.details.structure.mrz || { found: false, data: {} }; } catch (e) { return { found: false, data: {} }; }
+                },
+                get filename() { return this.currentReport ? this.currentReport.filename : ''; },
+                get previewUrl() { return this.currentReport ? this.currentReport.previewUrl : ''; },
+                get heatmapUrl() { return this.currentReport ? this.currentReport.heatmap_url : ''; },
+                get triage_category() { return this.currentReport ? (this.currentReport.triage_category || 'A') : 'A'; },
+                get refusal_reason() { return this.currentReport ? (this.currentReport.refusal_reason || '') : ''; },
+
+                get textContent() {
+                    if (!this.currentReport) return '';
+                    return this.stats.text_content || this.forensic.safe_snippet || "Aucun texte extrait.";
+                },
+
+                get verdictColor() {
+                    if (this.currentReport && this.currentReport.verdict === 'REFUSED') return 'text-slate-500';
+                    if (this.currentReport && this.currentReport.triage_category === 'B') return 'text-orange-500'; // Force Orange for Reserve
+
+                    if (this.score >= 60) return 'text-red-500';
+                    if (this.score >= 20) return 'text-orange-400';
+                    return 'text-green-500';
+                },
+
+                get scoreColor() {
+                    if (this.currentReport && this.currentReport.verdict === 'REFUSED') return '#64748b';
+                    if (this.currentReport && this.currentReport.triage_category === 'B') return '#f97316';
+
+                    if (this.score >= 60) return '#ef4444';
+                    if (this.score >= 20) return '#fb923c';
+                    return '#22c55e';
+                },
+
+                get verdictText() {
+                    if (this.currentReport && this.currentReport.verdict === 'REFUSED') return 'NON PRIS EN CHARGE';
+                    if (this.currentReport && this.currentReport.triage_category === 'B') return 'ANALYSE SOUS RÉSERVE';
+
+                    // Use backend-provided verdict if available
+                    if (this.currentReport && this.currentReport.verdict) {
+                        return this.currentReport.verdict;
+                    }
+                    // Fallback
+                    if (this.score >= 60) return 'ANOMALIES CRITIQUES';
+                    if (this.score >= 20) return 'ATYPIQUE / À VÉRIFIER';
+                    return 'COHÉRENCE TECHNIQUE';
+                },
+
+                get isScanContext() {
+                    // Check if document looks like a scan (neutral producer + lowish resolution implied)
+                    const prod = (this.metadata.producer || '').toLowerCase();
+                    const scanTerms = ['scanner', 'canon', 'hp', 'epson', 'xerox', 'brother', 'printer'];
+                    return scanTerms.some(t => prod.includes(t));
+                },
+
+                // Expose handleFiles logic
+                handleFiles(files) {
+                    this.processFiles(files);
+                },
+
+                // Internal logic called by global handler or Alpine
+                processFiles(files) {
+                    if (!files || files.length === 0) return;
+                    console.log("Processing files:", files);
+                    this.state = 'analyzing';
+                    this.fileCount = files.length;
+
+                    // Call global handler which does the fetch and event dispatching
+                    window.handleFilesGlobal(files, this.sector || 'GENERIC');
+                },
+
+                // Handler for Event-Driven Results
+                handleAnalysisResults(data) {
+                    console.log("Alpine received results:", data);
+                    this.reports = data.individual_reports || [];
+                    this.batchLogic = data.batch_logic || null;
+                    this.fileCount = this.reports.length;
+                    this.selectedDocIndex = 0;
+
+                    // Force UI update
+                    this.$nextTick(() => { this.state = 'done'; });
+                },
+
+                reset() {
+                    this.state = 'idle';
+                    this.reports = [];
+                    this.batchLogic = null;
+                },
+
+                formatEvidence(item) {
+                    // Clean up underscores and common prefixes
+                    if (!item) return '';
+                    return item.toString().replace(/_/g, ' ');
+                },
+
+                getEvidenceDesc(item) {
+                    if (!item) return '';
+                    const str = item.toString();
+                    const descs = {
+                        'METADATA_PRODUCER_MISSING': "Le logiciel créateur est absent des métadonnées.",
+                        'SUSPICIOUS_PRODUCER': "Document généré par un outil d'édition en ligne.",
+                        'IMAGE_PRESENT': "Images détectées dans le document (logos ou possibles collages).",
+                        'ELA_TAMPER_DETECTED': "L'analyse ELA révèle des inconsistances de pixels.",
+                        'INVALID_SOCIAL_SECURITY_NUMBER': "Le NIR est mathématiquement invalide.",
+                        'TIME_PARADOX_DETECTED': "La date du document est postérieure à sa création.",
+                        'SEMANTIC_FORGERY_KEYWORD': "MOT-CLÉ SUSPECT : Présence de termes typiques de faux."
+                    };
+                    for (const key in descs) {
+                        if (str.includes(key) || str.includes(key.split('_')[0])) return descs[key];
+                    }
+                    return "Indicateur technique de risque détecté.";
+                },
+
+                moveMagnifier(e) {
+                    if (!this.isLoupeActive) return;
+                    const img = e.target;
+                    const rect = img.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const zoom = 3.0;
+                    const size = 180;
+                    const bgUrl = (this.showHeatmap && this.heatmapUrl) ? this.heatmapUrl : this.previewUrl;
+
+                    this.magnifierStyle = `
+                            display: block;
+                            left: ${x - size / 2}px;
+                            top: ${y - size / 2}px;
+                            background-image: url('${bgUrl}');
+                            background-repeat: no-repeat;
+                            background-size: ${img.width * zoom}px ${img.height * zoom}px;
+                            background-position: ${-x * zoom + size / 2}px ${-y * zoom + size / 2}px;
+                        `;
+                },
+
+                resetAnalysis() {
+                    this.state = 'idle';
+                    this.reports = [];
+                    // FIXED: Removed write to getter
+                    this.batchLogic = null;
+                    this.fileCount = 0;
+                    this.selectedDocIndex = 0;
+                }
+            }
+        }
+    </script>
+
+    <!-- Heatmap Modal (Restored) -->
+    <div x-show="showHeatmap"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-sm" x-cloak>
+        <div class="relative w-full max-w-5xl glass-panel rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
+            @click.away="showHeatmap = false">
+            <div class="flex items-center justify-between p-6 border-b border-slate-800">
+                <div class="flex items-center gap-4">
+                    <h3 class="text-white font-bold text-xl">Analyse Spectrale Pixels</h3>
+                    <button @click="isLoupeActive = !isLoupeActive"
+                        :class="isLoupeActive ? 'bg-blue-600 text-white shadow-blue-500/40' : 'bg-slate-800 text-slate-400 border-slate-700'"
+                        class="px-4 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center gap-2 shadow-lg">
+                        <span class="w-2 h-2 rounded-full"
+                            :class="isLoupeActive ? 'bg-white animate-pulse' : 'bg-slate-500'"></span>
+                        ACTIVER LOUPE EXPERT
+                    </button>
+                </div>
+                <button @click="showHeatmap = false; isLoupeActive = false" class="text-slate-400 hover:text-white">
+                    Fermer</button>
+            </div>
+            <div class="p-2 bg-slate-950 relative overflow-hidden h-full flex items-center justify-center">
+                <div id="magnifier-container" class="relative inline-block">
+                    <img :src="showHeatmap ? heatmapUrl : previewUrl" id="heatmap-img"
+                        class="max-w-full h-auto max-h-[70vh] object-contain"
+                        :class="isLoupeActive ? 'cursor-none' : 'cursor-crosshair'" @mousemove="moveMagnifier($event)"
+                        @mouseenter="if(isLoupeActive) showMagnifier = true" @mouseleave="showMagnifier = false">
+                    <div x-show="showMagnifier && isLoupeActive" id="magnifier" class="magnifier magnifier-pulse"
+                        :style="magnifierStyle" style="border-width: 4px;"></div>
+                </div>
+                <div class="absolute bottom-6 right-6 flex gap-2">
+                    <button @click="showHeatmap = !showHeatmap"
+                        class="px-4 py-2 rounded-xl bg-slate-900/80 backdrop-blur shadow-xl border border-white/10 text-xs font-bold transition-all"
+                        :class="showHeatmap ? 'text-blue-400' : 'text-slate-500'">
+                        <span x-text="showHeatmap ? 'VOIR ORIGINAL' : 'VOIR HEATMAP'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

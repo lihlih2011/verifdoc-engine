@@ -1,0 +1,23 @@
+VerifDoc Test Bank - Acquisition Summary
+============================================================
+
+BANKING: 0 files
+
+GOVERNMENT: 0 files
+
+EMPLOYMENT: 0 files
+
+UTILITIES: 2 files
+  - free_bill.pdf
+  - orange_bill.pdf
+
+LEGAL: 0 files
+
+EDUCATION: 0 files
+
+HEALTHCARE: 0 files
+
+IDENTITY: 0 files
+
+REAL_ESTATE: 0 files
+

@@ -1,0 +1,13 @@
+{
+  "document": "chawkifares_Lettre_Admission_EXEC- F.pdf",
+  "verdict": "DOCUMENT SUSPECT",
+  "confidenceScore": 40,
+  "anomalies": [
+    "Critical content inconsistency detected"
+  ],
+  "criticalInconsistency": true,
+  "criticalReasons": [
+    "Multiple date values detected (possible alteration)"
+  ],
+  "analyzedAt": "2025-12-16T12:51:46.814Z"
+}
